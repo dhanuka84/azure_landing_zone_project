@@ -1,0 +1,210 @@
+trigger:
+  branches: { include: [ main ] }
+  paths: { include: [ infra/** ] }
+
+variables:
+- group: vg-terraform
+
+stages:
+- stage: platform_mg
+  displayName: "Platform :: Management Groups & Policy"
+  jobs:
+  - job: tf
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: TerraformInstaller@1
+      inputs: { terraformVersion: '1.7.5' }
+
+    - task: TerraformCLI@1
+      displayName: "Init (MG)"
+      inputs:
+        command: 'init'
+        workingDirectory: 'infra/platform/mg'
+        backendType: 'azurerm'
+        backendServiceArm: 'azrm-platform'
+        ensureBackend: true
+        backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+        backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+        backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+        backendAzureRmKey: '$(TF_STATE_KEY_PLATFORM_MG)'
+
+    - task: TerraformCLI@1
+      displayName: "Validate (MG)"
+      inputs:
+        command: 'validate'
+        workingDirectory: 'infra/platform/mg'
+
+    - task: TerraformCLI@1
+      displayName: "Plan (MG)"
+      inputs:
+        command: 'plan'
+        workingDirectory: 'infra/platform/mg'
+        environmentServiceName: 'azrm-platform'
+        commandOptions: '-out=tfplan'
+
+    - task: TerraformCLI@1
+      displayName: "Apply (MG)"
+      inputs:
+        command: 'apply'
+        workingDirectory: 'infra/platform/mg'
+        environmentServiceName: 'azrm-platform'
+        commandOptions: 'tfplan'
+
+- stage: platform_connectivity
+  displayName: "Platform :: Connectivity (Hub VNet)"
+  dependsOn: platform_mg
+  jobs:
+  - job: tf
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: TerraformInstaller@1
+      inputs: { terraformVersion: '1.7.5' }
+
+    - task: TerraformCLI@1
+      displayName: "Init (Connectivity)"
+      inputs:
+        command: 'init'
+        workingDirectory: 'infra/platform/connectivity'
+        backendType: 'azurerm'
+        backendServiceArm: 'azrm-platform'
+        ensureBackend: true
+        backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+        backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+        backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+        backendAzureRmKey: '$(TF_STATE_KEY_CONNECTIVITY)'
+
+    - task: TerraformCLI@1
+      displayName: "Validate (Connectivity)"
+      inputs:
+        command: 'validate'
+        workingDirectory: 'infra/platform/connectivity'
+
+    - task: TerraformCLI@1
+      displayName: "Plan (Connectivity)"
+      inputs:
+        command: 'plan'
+        workingDirectory: 'infra/platform/connectivity'
+        environmentServiceName: 'azrm-platform'
+        commandOptions: '-var-file=hub.tfvars -out=tfplan'
+
+    - task: TerraformCLI@1
+      displayName: "Apply (Connectivity)"
+      inputs:
+        command: 'apply'
+        workingDirectory: 'infra/platform/connectivity'
+        environmentServiceName: 'azrm-platform'
+        commandOptions: 'tfplan'
+
+- stage: env_dev
+  displayName: "Env :: Dev Spoke"
+  dependsOn: platform_connectivity
+  jobs:
+  - job: tf
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: TerraformInstaller@1
+      inputs: { terraformVersion: '1.7.5' }
+    - task: TerraformCLI@1
+      displayName: "Init (Dev)"
+      inputs:
+        command: 'init'
+        workingDirectory: 'infra/envs/dev'
+        backendType: 'azurerm'
+        backendServiceArm: 'azrm-platform'
+        ensureBackend: true
+        backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+        backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+        backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+        backendAzureRmKey: '$(TF_STATE_KEY_DEV)'
+    - task: TerraformCLI@1
+      displayName: "Plan (Dev)"
+      inputs:
+        command: 'plan'
+        workingDirectory: 'infra/envs/dev'
+        environmentServiceName: 'azrm-nonprod'
+        commandOptions: '-var-file=dev.tfvars -out=tfplan'
+    - task: TerraformCLI@1
+      displayName: "Apply (Dev)"
+      inputs:
+        command: 'apply'
+        workingDirectory: 'infra/envs/dev'
+        environmentServiceName: 'azrm-nonprod'
+        commandOptions: 'tfplan'
+
+- stage: env_qa
+  displayName: "Env :: QA Spoke & (optional) AKS/ACR/KV"
+  dependsOn: env_dev
+  jobs:
+  - job: tf
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: TerraformInstaller@1
+      inputs: { terraformVersion: '1.7.5' }
+    - task: TerraformCLI@1
+      displayName: "Init (QA)"
+      inputs:
+        command: 'init'
+        workingDirectory: 'infra/envs/qa'
+        backendType: 'azurerm'
+        backendServiceArm: 'azrm-platform'
+        ensureBackend: true
+        backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+        backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+        backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+        backendAzureRmKey: '$(TF_STATE_KEY_QA)'
+    - task: TerraformCLI@1
+      displayName: "Plan (QA)"
+      inputs:
+        command: 'plan'
+        workingDirectory: 'infra/envs/qa'
+        environmentServiceName: 'azrm-nonprod'
+        commandOptions: '-var-file=qa.tfvars -out=tfplan'
+    - task: TerraformCLI@1
+      displayName: "Apply (QA)"
+      inputs:
+        command: 'apply'
+        workingDirectory: 'infra/envs/qa'
+        environmentServiceName: 'azrm-nonprod'
+        commandOptions: 'tfplan'
+
+- stage: env_prod
+  displayName: "Env :: PROD Spoke + AKS/ACR/KV/PEs"
+  dependsOn: env_qa
+  jobs:
+  - deployment: tf
+    environment: prod
+    strategy:
+      runOnce:
+        preDeployApprovals:
+          approvals:
+          - approvalType: Manual
+        deploy:
+          steps:
+          - task: TerraformInstaller@1
+            inputs: { terraformVersion: '1.7.5' }
+          - task: TerraformCLI@1
+            displayName: "Init (Prod)"
+            inputs:
+              command: 'init'
+              workingDirectory: 'infra/envs/prod'
+              backendType: 'azurerm'
+              backendServiceArm: 'azrm-platform'
+              ensureBackend: true
+              backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+              backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+              backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+              backendAzureRmKey: '$(TF_STATE_KEY_PROD)'
+          - task: TerraformCLI@1
+            displayName: "Plan (Prod)"
+            inputs:
+              command: 'plan'
+              workingDirectory: 'infra/envs/prod'
+              environmentServiceName: 'azrm-prod'
+              commandOptions: '-var-file=prod.tfvars -out=tfplan'
+          - task: TerraformCLI@1
+            displayName: "Apply (Prod)"
+            inputs:
+              command: 'apply'
+              workingDirectory: 'infra/envs/prod'
+              environmentServiceName: 'azrm-prod'
+              commandOptions: 'tfplan'

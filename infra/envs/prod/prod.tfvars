@@ -1,0 +1,6 @@
+location            = "westeurope"
+resource_group_name = "rg-prod-app-services"
+hub_rg_name         = "rg-platform-connectivity"
+hub_vnet_name       = "vnet-hub-weu"
+spn_app_cicd_prod      = "<objectId-of-app-cicd-prod>"
+spn_key_vault_api_prod = "<objectId-of-key-vault-api-prod>"
