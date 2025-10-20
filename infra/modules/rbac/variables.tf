@@ -5,3 +5,4 @@ variable "assignments" {
     principal_objectId = string
   }))
 }
+variable "tags" { type = map(string), default = {} }

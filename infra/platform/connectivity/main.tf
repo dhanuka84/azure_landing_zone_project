@@ -8,4 +8,23 @@ module "hub" {
   gateway_cidr        = "10.0.1.0/24"
   bastion_cidr        = "10.0.2.0/24"
   create_private_dns  = true
+  tags                = { environment = "platform" }
 }
+
+# Azure Firewall in hub
+data "azurerm_subnet" "afw_subnet" {
+  name                 = "AzureFirewallSubnet"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = module.hub.vnet_name
+}
+
+module "firewall" {
+  source              = "../../modules/azure-firewall"
+  name                = "afw-hub"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = data.azurerm_subnet.afw_subnet.id
+  tags                = { environment = "platform", layer = "security" }
+}
+
+output "firewall_private_ip" { value = module.firewall.private_ip }

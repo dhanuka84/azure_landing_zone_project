@@ -18,6 +18,7 @@ module "spoke" {
   hub_vnet_name       = var.hub_vnet_name
   allow_gateway_transit = true
   use_remote_gateways   = true
+  tags                = var.tags
 }
 
 module "acr" {
@@ -26,6 +27,7 @@ module "acr" {
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "Premium"
+  tags                = var.tags
 }
 
 module "aks" {
@@ -37,6 +39,7 @@ module "aks" {
   subnet_id           = module.spoke.subnet_ids["snet-aks-nodes"]
   node_count          = 3
   vm_size             = "Standard_DS3_v2"
+  tags                = var.tags
 }
 
 data "azurerm_client_config" "current" {}
@@ -49,6 +52,7 @@ module "kv" {
   tenant_id           = data.azurerm_client_config.current.tenant_id
   public_network_access_enabled = false
   purge_protection_enabled     = true
+  tags                = var.tags
 }
 
 module "rbac" {
@@ -70,6 +74,7 @@ module "rbac" {
       principal_objectId = var.spn_key_vault_api_prod
     }
   ]
+  tags = var.tags
 }
 
 module "pe_kv" {
@@ -80,6 +85,7 @@ module "pe_kv" {
   subnet_id           = module.spoke.subnet_ids["snet-private-endpoints"]
   target_resource_id  = module.kv.id
   subresource_names   = ["vault"]
+  tags                = var.tags
 }
 
 module "pe_acr" {
@@ -90,4 +96,16 @@ module "pe_acr" {
   subnet_id           = module.spoke.subnet_ids["snet-private-endpoints"]
   target_resource_id  = module.acr.id
   subresource_names   = ["registry"]
+  tags                = var.tags
+}
+
+# UDR: Default route to Azure Firewall
+module "udr_default" {
+  source              = "../../modules/udr"
+  name                = "rt-prod-default"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  firewall_private_ip = var.firewall_private_ip
+  subnet_ids          = [module.spoke.subnet_ids["snet-aks-nodes"]]
+  tags                = var.tags
 }

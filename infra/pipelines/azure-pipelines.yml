@@ -14,7 +14,6 @@ stages:
     steps:
     - task: TerraformInstaller@1
       inputs: { terraformVersion: '1.7.5' }
-
     - task: TerraformCLI@1
       displayName: "Init (MG)"
       inputs:
@@ -27,13 +26,11 @@ stages:
         backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
         backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
         backendAzureRmKey: '$(TF_STATE_KEY_PLATFORM_MG)'
-
     - task: TerraformCLI@1
       displayName: "Validate (MG)"
       inputs:
         command: 'validate'
         workingDirectory: 'infra/platform/mg'
-
     - task: TerraformCLI@1
       displayName: "Plan (MG)"
       inputs:
@@ -41,7 +38,6 @@ stages:
         workingDirectory: 'infra/platform/mg'
         environmentServiceName: 'azrm-platform'
         commandOptions: '-out=tfplan'
-
     - task: TerraformCLI@1
       displayName: "Apply (MG)"
       inputs:
@@ -51,7 +47,7 @@ stages:
         commandOptions: 'tfplan'
 
 - stage: platform_connectivity
-  displayName: "Platform :: Connectivity (Hub VNet)"
+  displayName: "Platform :: Connectivity (Hub VNet + Firewall)"
   dependsOn: platform_mg
   jobs:
   - job: tf
@@ -59,7 +55,6 @@ stages:
     steps:
     - task: TerraformInstaller@1
       inputs: { terraformVersion: '1.7.5' }
-
     - task: TerraformCLI@1
       displayName: "Init (Connectivity)"
       inputs:
@@ -72,13 +67,11 @@ stages:
         backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
         backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
         backendAzureRmKey: '$(TF_STATE_KEY_CONNECTIVITY)'
-
     - task: TerraformCLI@1
       displayName: "Validate (Connectivity)"
       inputs:
         command: 'validate'
         workingDirectory: 'infra/platform/connectivity'
-
     - task: TerraformCLI@1
       displayName: "Plan (Connectivity)"
       inputs:
@@ -86,7 +79,6 @@ stages:
         workingDirectory: 'infra/platform/connectivity'
         environmentServiceName: 'azrm-platform'
         commandOptions: '-var-file=hub.tfvars -out=tfplan'
-
     - task: TerraformCLI@1
       displayName: "Apply (Connectivity)"
       inputs:
@@ -96,7 +88,7 @@ stages:
         commandOptions: 'tfplan'
 
 - stage: env_dev
-  displayName: "Env :: Dev Spoke"
+  displayName: "Env :: Dev Spoke + UDR"
   dependsOn: platform_connectivity
   jobs:
   - job: tf
@@ -132,7 +124,7 @@ stages:
         commandOptions: 'tfplan'
 
 - stage: env_qa
-  displayName: "Env :: QA Spoke & (optional) AKS/ACR/KV"
+  displayName: "Env :: QA Spoke + ACR + UDR"
   dependsOn: env_dev
   jobs:
   - job: tf
@@ -168,7 +160,7 @@ stages:
         commandOptions: 'tfplan'
 
 - stage: env_prod
-  displayName: "Env :: PROD Spoke + AKS/ACR/KV/PEs"
+  displayName: "Env :: PROD Spoke + AKS/ACR/KV/PEs + UDR"
   dependsOn: env_qa
   jobs:
   - deployment: tf

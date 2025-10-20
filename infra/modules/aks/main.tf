@@ -1,3 +1,5 @@
+locals { tags = merge({ managed_by = "terraform" }, var.tags) }
+
 resource "azurerm_kubernetes_cluster" "this" {
   name                = var.name
   location            = var.location
@@ -12,6 +14,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   identity { type = "SystemAssigned" }
   network_profile { network_plugin = "azure" }
   azure_active_directory_role_based_access_control { managed = true }
+  tags = local.tags
 }
 
 output "id" { value = azurerm_kubernetes_cluster.this.id }

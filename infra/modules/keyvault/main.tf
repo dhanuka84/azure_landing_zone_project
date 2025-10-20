@@ -1,3 +1,5 @@
+locals { tags = merge({ managed_by = "terraform" }, var.tags) }
+
 resource "azurerm_key_vault" "this" {
   name                          = var.name
   location                      = var.location
@@ -7,6 +9,7 @@ resource "azurerm_key_vault" "this" {
   public_network_access_enabled = var.public_network_access_enabled
   purge_protection_enabled      = var.purge_protection_enabled
   soft_delete_retention_days    = 7
+  tags                          = local.tags
 }
 
 output "id" { value = azurerm_key_vault.this.id }

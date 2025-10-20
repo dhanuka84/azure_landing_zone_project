@@ -6,3 +6,4 @@ variable "firewall_cidr" { type = string }
 variable "gateway_cidr"  { type = string }
 variable "bastion_cidr"  { type = string }
 variable "create_private_dns" { type = bool, default = true }
+variable "tags" { type = map(string), default = {} }

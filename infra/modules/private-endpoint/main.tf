@@ -1,3 +1,5 @@
+locals { tags = merge({ managed_by = "terraform" }, var.tags) }
+
 resource "azurerm_private_endpoint" "this" {
   name                = var.name
   location            = var.location
@@ -9,6 +11,7 @@ resource "azurerm_private_endpoint" "this" {
     subresource_names              = var.subresource_names
     is_manual_connection           = false
   }
+  tags = local.tags
 }
 
 output "id" { value = azurerm_private_endpoint.this.id }

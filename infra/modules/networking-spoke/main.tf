@@ -1,8 +1,11 @@
+locals { tags = merge({ managed_by = "terraform" }, var.tags) }
+
 resource "azurerm_virtual_network" "spoke" {
   name                = var.vnet_name
   location            = var.location
   resource_group_name = var.resource_group_name
   address_space       = var.address_space
+  tags                = local.tags
 }
 
 resource "azurerm_subnet" "this" {
@@ -35,3 +38,5 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke" {
   allow_forwarded_traffic   = true
   use_remote_gateways       = var.use_remote_gateways
 }
+
+output "subnet_ids" { value = { for k, s in azurerm_subnet.this : k => s.id } }
