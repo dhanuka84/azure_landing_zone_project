@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Mental Model Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+        }
+        .container-box {
+            background-color: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .purpose {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+        .item-list {
+            list-style: none;
+            padding-left: 1.25rem;
+            border-left: 2px solid #cbd5e1;
+        }
+        .item-list li {
+            position: relative;
+            padding-left: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .item-list li::before {
+            content: '';
+            position: absolute;
+            left: -1.25rem;
+            top: 0.5em;
+            width: 0.75rem;
+            height: 2px;
+            background-color: #cbd5e1;
+        }
+        .item-title {
+            font-weight: 500;
+            color: #475569;
+        }
+        .item-detail {
+            font-size: 0.875rem;
+            color: #64748b;
+            display: block;
+        }
+        .icon {
+            margin-right: 0.5rem;
+            color: #3b82f6;
+        }
+        .policy-tag {
+            background-color: #eef2ff;
+            color: #4f46e5;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        .rbac-tag {
+            background-color: #fefce8;
+            color: #a16207;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        .aks-policy-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        .privileged { background-color: #fef2f2; color: #dc2626; }
+        .restricted { background-color: #ecfdf5; color: #16a34a; }
+        .baseline { background-color: #fffbeb; color: #f59e0b; }
+
+    </style>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="p-8">
+
+    <h1 class="text-3xl font-bold text-center mb-4 text-slate-800">Azure Enterprise Scaffolding Model</h1>
+    <p class="text-center text-slate-500 mb-12 max-w-3xl mx-auto">This diagram illustrates a well-architected Azure environment, showing the relationship between billing, identity, governance, and resource deployment across different environments.</p>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Top Level -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="container-box">
+                <h2 class="title"><i class="fas fa-file-invoice-dollar icon"></i>Billing Account</h2>
+                <p class="purpose">Top-level financial ownership and cost aggregation for the entire organization.</p>
+                <span class="item-detail">e.g., Enterprise Agreement or Microsoft Customer Agreement</span>
+            </div>
+            <div class="container-box">
+                <h2 class="title"><i class="fas fa-users-cog icon"></i>Microsoft Entra ID Tenant</h2>
+                <p class="purpose">Single source of truth for identity and access management (IAM).</p>
+                <ul class="item-list mt-4">
+                    <li><span class="item-title"><i class="fas fa-user icon"></i>Users and Groups</span> <span class="item-detail">e.g., "Dev Team Group", "AKS Admins Group"</span></li>
+                    <li>
+                        <span class="item-title"><i class="fas fa-robot icon"></i>App Registrations / Service Principals</span>
+                        <span class="item-detail">Identities for automated processes and applications (scoped per environment).</span>
+                        <ul class="item-list mt-2">
+                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-orange-600">-- CI/CD Pipeline --</span></li>
+                            <li><span class="item-title">app-cicd-prod:</span> <span class="item-detail">Pushes images to ACR & deploys to Prod AKS.</span></li>
+                            <li><span class="item-title">app-cicd-qa:</span> <span class="item-detail">Pushes images to ACR & deploys to QA AKS.</span></li>
+                            <li><span class="item-title">app-cicd-dev:</span> <span class="item-detail">Pushes images to ACR & deploys to Dev AKS.</span></li>
+                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-emerald-600">-- Shared Workloads --</span></li>
+                            <li><span class="item-title">key-vault-api-prod:</span> <span class="item-detail">Used by Payment & Shipping APIs for Key Vaults & Service Bus.</span></li>
+                            <li><span class="item-title">key-vault-api-qa:</span> <span class="item-detail">QA identity for APIs.</span></li>
+                            <li><span class="item-title">key-vault-api-dev:</span> <span class="item-detail">Dev identity for APIs.</span></li>
+                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-blue-600">-- Payment Service --</span></li>
+                            <li><span class="item-title">app-sb-worker-prod:</span> <span class="item-detail">Prod Payment Service Bus Worker.</span></li>
+                            <li><span class="item-title">app-sb-worker-qa:</span> <span class="item-detail">QA Payment Service Bus Worker.</span></li>
+                            <li><span class="item-title">app-sb-worker-dev:</span> <span class="item-detail">Dev Payment Service Bus Worker.</span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Management Group Hierarchy -->
+        <div class="container-box">
+            <h2 class="title"><i class="fas fa-sitemap icon"></i>Management Group Hierarchy</h2>
+            <p class="purpose">Organizes subscriptions and applies universal security policies (Azure Policy) and access controls (RBAC).</p>
+
+            <ul class="item-list mt-4">
+                <!-- Production -->
+                <li>
+                    <div class="font-semibold text-lg text-green-700"><i class="fas fa-shield-alt icon text-green-500"></i>Management Group: "Production"</div>
+                    <div class="policy-tag">Policy: Enforce strict security, logging, and disallow certain VM SKUs.</div>
+                    <ul class="item-list mt-2">
+                        <li>
+                            <span class="item-title"><i class="fas fa-cloud icon"></i>Subscription: "Prod Environment"</span>
+                            <span class="item-detail">Hosts all production resources. Highly restricted access.</span>
+                            <ul class="item-list mt-2">
+                                <li>
+                                    <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-prod-app-services"</span>
+                                    <ul class="item-list mt-2">
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-prod-main"</span>
+                                            <div class="rbac-tag">RBAC: Grant "app-cicd-prod" the Azure Kubernetes Service Cluster User Role.</div>
+                                            <ul class="item-list mt-2">
+                                                <li class="pb-2 border-b border-slate-200 mb-2">
+                                                    <span class="item-title text-blue-600">Namespace: "ns-prod-payment"</span>
+                                                    <div><span class="aks-policy-tag restricted">Policy: Restricted</span></div>
+                                                    <ul class="item-list mt-2">
+                                                        <li><span class="item-title"><i class="fas fa-cogs icon text-blue-500"></i>Workload (API):</span> <span class="item-detail">Uses 'key-vault-api-prod' for Key Vault.</span></li>
+                                                        <li><span class="item-title"><i class="fas fa-cogs icon text-blue-500"></i>Workload (Worker):</span> <span class="item-detail">Uses 'app-sb-worker-prod' for Service Bus.</span></li>
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <span class="item-title text-purple-600">Namespace: "ns-prod-shipping"</span>
+                                                    <div><span class="aks-policy-tag restricted">Policy: Restricted</span></div>
+                                                    <ul class="item-list mt-2">
+                                                        <li><span class="item-title"><i class="fas fa-truck icon text-purple-500"></i>Workload (API):</span> <span class="item-detail">Uses 'key-vault-api-prod' for Key Vault & Service Bus.</span></li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-database icon"></i>Azure Container Registry: "acr-prod-main"</span>
+                                            <div class="rbac-tag">RBAC: Grant "app-cicd-prod" the AcrPush role.</div>
+                                        </li>
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vault: "kv-prod-payment-secrets"</span>
+                                            <div class="rbac-tag">RBAC: Grant "key-vault-api-prod" Secrets User role.</div>
+                                        </li>
+                                         <li>
+                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vault: "kv-prod-shipping-secrets"</span>
+                                            <div class="rbac-tag">RBAC: Grant "key-vault-api-prod" Secrets User role.</div>
+                                        </li>
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-envelope-open-text icon"></i>Service Bus: "sb-prod-main"</span>
+                                            <ul class="item-list mt-2">
+                                                <li><span class="item-title">Queue: "order-processing"</span></li>
+                                                <li><span class="item-title">Queue: "shipping-notifications"</span></li>
+                                            </ul>
+                                            <div class="rbac-tag">RBAC: Grant "app-sb-worker-prod" Data Receiver role.</div>
+                                            <div class="rbac-tag">RBAC: Grant "key-vault-api-prod" Data Sender role.</div>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Non-Production -->
+                <li>
+                    <div class="font-semibold text-lg text-amber-700"><i class="fas fa-flask icon text-amber-500"></i>Management Group: "Non-Production"</div>
+                     <div class="policy-tag">Policy: More flexible policies for development and testing.</div>
+                    <ul class="item-list mt-2">
+                        <li>
+                            <span class="item-title"><i class="fas fa-vial icon"></i>Subscription: "QA Environment"</span>
+                            <span class="item-detail">Hosts resources for quality assurance.</span>
+                            <ul class="item-list mt-2">
+                                <li>
+                                     <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-qa-app-services"</span>
+                                     <ul class="item-list mt-2">
+                                         <li><span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-qa-main"</span></li>
+                                         <li><span class="item-title"><i class="fas fa-database icon"></i>ACR: "acr-qa-main"</span></li>
+                                         <li>
+                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vaults, Service Bus...</span>
+                                            <div class="rbac-tag">RBAC: Assign roles to 'key-vault-api-qa', 'app-cicd-qa', etc.</div>
+                                        </li>
+                                     </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <span class="item-title"><i class="fas fa-laptop-code icon"></i>Subscription: "Dev Environment"</span>
+                            <span class="item-detail">Sandbox for developers.</span>
+                             <ul class="item-list mt-2">
+                                <li>
+                                     <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-dev-user-a"</span>
+                                      <ul class="item-list mt-2">
+                                         <li><span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-dev-user-a"</span></li>
+                                         <li><span class="item-title"><i class="fas fa-database icon"></i>ACR: "acr-dev-user-a"</span></li>
+                                         <li>
+                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vaults, Service Bus...</span>
+                                            <div class="rbac-tag">RBAC: Assign roles to dev identities.</div>
+                                        </li>
+                                      </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
+

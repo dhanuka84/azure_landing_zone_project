@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Enterprise Landing Zone Model</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+        }
+        .container-box {
+            background-color: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .purpose {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+        .item-list {
+            list-style: none;
+            padding-left: 1.25rem;
+            border-left: 2px solid #cbd5e1;
+        }
+        .item-list li {
+            position: relative;
+            padding-left: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .item-list li::before {
+            content: '';
+            position: absolute;
+            left: -1.25rem;
+            top: 0.5em;
+            width: 0.75rem;
+            height: 2px;
+            background-color: #cbd5e1;
+        }
+        .item-title {
+            font-weight: 500;
+            color: #475569;
+        }
+        .item-detail {
+            font-size: 0.875rem;
+            color: #64748b;
+            display: block;
+        }
+        .icon {
+            margin-right: 0.5rem;
+            color: #3b82f6;
+        }
+        .tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-top: 0.5rem;
+            margin-right: 0.25rem;
+        }
+        .policy-tag { background-color: #eef2ff; color: #4f46e5; }
+        .rbac-tag { background-color: #fefce8; color: #a16207; }
+        .network-tag { background-color: #f0f9ff; color: #0284c7; }
+        .region-tag { background-color: #f5f3ff; color: #6d28d9; }
+        .az-tag { background-color: #f0fdf4; color: #16a34a;}
+    </style>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="p-8">
+
+    <h1 class="text-3xl font-bold text-center mb-4 text-slate-800">Azure Enterprise Landing Zone Model</h1>
+    <p class="text-center text-slate-500 mb-12 max-w-3xl mx-auto">This diagram illustrates a well-architected Azure environment, showing the relationship between billing, identity, governance, networking, and resource deployment across different environments.</p>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Top Level -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="container-box">
+                <h2 class="title"><i class="fas fa-file-invoice-dollar icon"></i>Billing Account</h2>
+                <p class="purpose">Top-level financial ownership and cost aggregation for the entire organization.</p>
+                <span class="item-detail">e.g., Enterprise Agreement or Microsoft Customer Agreement</span>
+            </div>
+            <div class="container-box">
+                <h2 class="title"><i class="fas fa-users-cog icon"></i>Microsoft Entra ID Tenant</h2>
+                <p class="purpose">Single source of truth for identity and access management (IAM).</p>
+                <ul class="item-list mt-4">
+                    <li><span class="item-title"><i class="fas fa-user icon"></i>Users and Groups</span> <span class="item-detail">e.g., "Dev Team Group", "AKS Admins Group"</span></li>
+                    <li>
+                        <span class="item-title"><i class="fas fa-robot icon"></i>App Registrations / Service Principals</span>
+                        <span class="item-detail">Identities for automated processes and applications (scoped per environment).</span>
+                        <ul class="item-list mt-2">
+                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-orange-600">-- CI/CD Pipeline --</span></li>
+                            <li><span class="item-title">app-cicd-prod:</span> <span class="item-detail">Pushes images to ACR & deploys to Prod AKS.</span></li>
+                            <li><span class="item-title">app-cicd-qa:</span> <span class="item-detail">Pushes images to ACR & deploys to QA AKS.</span></li>
+                            <li><span class="item-title">app-cicd-dev:</span> <span class="item-detail">Pushes images to ACR & deploys to Dev AKS.</span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Management Group Hierarchy -->
+        <div class="container-box">
+            <h2 class="title"><i class="fas fa-sitemap icon"></i>Management Group Hierarchy</h2>
+            <p class="purpose">Organizes subscriptions and applies universal security policies (Azure Policy) and access controls (RBAC).</p>
+
+            <ul class="item-list mt-4">
+                <!-- Platform MG -->
+                 <li>
+                    <div class="font-semibold text-lg text-indigo-700"><i class="fas fa-landmark icon text-indigo-500"></i>Management Group: "Platform"</div>
+                    <div class="tag policy-tag">Policy: Enforce security and operational standards for shared services.</div>
+                    <ul class="item-list mt-2">
+                        <li>
+                            <span class="item-title"><i class="fas fa-cloud icon"></i>Subscription: "Connectivity"</span>
+                            <span class="item-detail">Hosts central networking infrastructure (Hub-and-Spoke model).</span>
+                            <ul class="item-list mt-2">
+                                <li>
+                                    <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-platform-connectivity"</span>
+                                    <ul class="item-list mt-2">
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-network-wired icon text-indigo-500"></i>Hub VNet: "vnet-hub-weu"</span>
+                                            <div><div class="tag region-tag">Region: West Europe</div></div>
+                                            <span class="item-detail">Central point for all network traffic.</span>
+                                            <ul class="item-list mt-2">
+                                                <li><span class="item-title"><i class="fas fa-fire-alt icon text-red-500"></i>AzureFirewallSubnet:</span> <span class="item-detail">Contains Azure Firewall (Zone-Redundant).</span><div class="tag az-tag">AZ</div></li>
+                                                <li><span class="item-title"><i class="fas fa-road-bridge icon text-green-500"></i>GatewaySubnet:</span> <span class="item-detail">For VPN/ExpressRoute gateway to on-premises.</span></li>
+                                                <li><span class="item-title"><i class="fas fa-user-shield icon text-blue-500"></i>AzureBastionSubnet:</span> <span class="item-detail">For secure RDP/SSH access to VMs.</span></li>
+                                            </ul>
+                                        </li>
+                                         <li><span class="item-title"><i class="fas fa-dns icon text-indigo-500"></i>Private DNS Zones</span> <span class="item-detail">For services like Key Vault, ACR, etc. (e.g., privatelink.vaultcore.azure.net)</span></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Production MG -->
+                <li>
+                    <div class="font-semibold text-lg text-green-700"><i class="fas fa-shield-alt icon text-green-500"></i>Management Group: "Production"</div>
+                    <div class="tag policy-tag">Policy: Enforce strict security, logging, and disallow certain VM SKUs.</div>
+                    <ul class="item-list mt-2">
+                        <li>
+                            <span class="item-title"><i class="fas fa-cloud icon"></i>Subscription: "Prod Environment"</span>
+                            <span class="item-detail">Hosts all production resources. Highly restricted access.</span>
+                            <ul class="item-list mt-2">
+                                <li>
+                                    <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-prod-app-services"</span>
+                                    <ul class="item-list mt-2">
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-network-wired icon text-green-500"></i>Spoke VNet: "vnet-prod-spoke"</span>
+                                             <div>
+                                                <div class="tag region-tag">Region: West Europe</div>
+                                                <div class="tag network-tag">VNet Peering: Connected to "vnet-hub-weu"</div>
+                                                <div class="tag network-tag">Route Table (UDR): Forces traffic through Hub Firewall</div>
+                                            </div>
+                                            <ul class="item-list mt-2">
+                                                <li><span class="item-title">snet-aks-nodes:</span><span class="item-detail">For AKS node pools.</span></li>
+                                                <li><span class="item-title">snet-private-endpoints:</span><span class="item-detail">For all Private Endpoints.</span></li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-prod-main"</span>
+                                            <span class="item-detail">Integrates with "vnet-prod-spoke" (snet-aks-nodes).</span>
+                                            <div class="tag rbac-tag">RBAC: Grant "app-cicd-prod" the AKS Cluster User Role.</div>
+                                            <div class="tag az-tag">AZ: Deployed across Availability Zones 1, 2, 3.</div>
+                                        </li>
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-database icon"></i>ACR: "acr-prod-main"</span>
+                                            <div class="tag rbac-tag">RBAC: Grant "app-cicd-prod" the AcrPush role.</div>
+                                            <div class="tag network-tag">Network: Accessed via Private Endpoint in "snet-private-endpoints".</div>
+                                        </li>
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vault: "kv-prod-secrets"</span>
+                                            <div class="tag rbac-tag">RBAC: Grant relevant SPs Secrets User role.</div>
+                                             <div class="tag network-tag">Network: Accessed via Private Endpoint in "snet-private-endpoints".</div>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Non-Production MG -->
+                <li>
+                    <div class="font-semibold text-lg text-amber-700"><i class="fas fa-flask icon text-amber-500"></i>Management Group: "Non-Production"</div>
+                     <div class="tag policy-tag">Policy: More flexible policies for development and testing.</div>
+                    <ul class="item-list mt-2">
+                        <li>
+                            <span class="item-title"><i class="fas fa-vial icon"></i>Subscription: "QA Environment"</span>
+                             <ul class="item-list mt-2">
+                                <li>
+                                     <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-qa-app-services"</span>
+                                     <ul class="item-list mt-2">
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-network-wired icon text-amber-500"></i>Spoke VNet: "vnet-qa-spoke"</span>
+                                            <div>
+                                                <div class="tag region-tag">Region: West Europe</div>
+                                                <div class="tag network-tag">VNet Peering: Connected to "vnet-hub-weu".</div>
+                                            </div>
+                                            <ul class="item-list mt-2">
+                                                <li><span class="item-title">snet-aks-nodes:</span><span class="item-detail">For QA AKS nodes.</span></li>
+                                                <li><span class="item-title">snet-private-endpoints:</span><span class="item-detail">For QA Private Endpoints.</span></li>
+                                            </ul>
+                                        </li>
+                                        <li><span class="item-title"><i class="fas fa-cubes icon"></i>AKS, ACR, Key Vault...</span><span class="item-detail">Resources configured with QA identities and Private Endpoints in "snet-private-endpoints".</span></li>
+                                     </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <span class="item-title"><i class="fas fa-laptop-code icon"></i>Subscription: "Dev Environment"</span>
+                             <ul class="item-list mt-2">
+                                <li>
+                                     <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-dev-user-a"</span>
+                                     <ul class="item-list mt-2">
+                                        <li>
+                                            <span class="item-title"><i class="fas fa-network-wired icon text-amber-500"></i>Spoke VNet: "vnet-dev-spoke"</span>
+                                            <div>
+                                                <div class="tag region-tag">Region: West Europe</div>
+                                                <div class="tag network-tag">VNet Peering: Connected to "vnet-hub-weu".</div>
+                                            </div>
+                                        </li>
+                                     </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
+
