@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Entra ID + Azure Landing Zone — Mental Model</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { background:#f1f5f9; font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:#0f172a; }
+    .card { background:white; border:1px solid #e2e8f0; border-radius:16px; box-shadow:0 6px 18px rgba(2,6,23,0.06); }
+    .badge { border-radius:9999px; padding:0.25rem 0.6rem; font-size:0.75rem; font-weight:600; display:inline-block; }
+    .badge-policy { background:#eef2ff; color:#4338ca; }
+    .badge-rbac { background:#fff7ed; color:#c2410c; }
+    .badge-sec { background:#ecfeff; color:#0e7490; }
+    .section-title { font-weight:700; color:#0f172a; }
+    .sub { color:#64748b; }
+    .list-line { border-left:2px solid #e5e7eb; padding-left:1rem; }
+    .kicker { letter-spacing:.04em; text-transform:uppercase; font-weight:700; color:#334155; font-size:.8rem; }
+  </style>
+</head>
+<body class="p-6 md:p-10">
+  <header class="max-w-6xl mx-auto text-center mb-10">
+    <div class="kicker mb-2">Zero Trust • Enterprise-Scale</div>
+    <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Microsoft Entra ID + Azure Landing Zone</h1>
+    <p class="text-slate-600 max-w-3xl mx-auto">A mental model that connects the Identity Plane (Entra ID) with the Landing Zone’s Control and Resource planes, showing how RBAC, Policy, and Network controls align to create a secretless, policy-driven platform.</p>
+  </header>
+
+  <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Identity Plane -->
+    <section class="card p-5 lg:col-span-1">
+      <h2 class="section-title text-xl mb-1"><i class="fa-solid fa-id-card-clip mr-2 text-blue-600"></i>Identity Plane</h2>
+      <p class="sub mb-4">Authenticates humans and workloads. <span class="badge badge-sec">“Never trust, always verify.”</span></p>
+      <ul class="list-line space-y-3">
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-user-group mr-2 text-blue-500"></i>Human Identities</div>
+          <div class="text-slate-600 text-sm">Admins &amp; operators are <strong>PIM</strong>-enabled; access conditioned by <strong>Conditional Access</strong> &amp; MFA.</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-rbac">PIM (JIT)</span>
+            <span class="badge badge-policy">Conditional Access</span>
+          </div>
+        </li>
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-robot mr-2 text-blue-500"></i>Workload Identities (UAMI)</div>
+          <div class="text-slate-600 text-sm">User-Assigned Managed Identities for apps (AKS, App Service, Functions) — no secrets.</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-rbac">Key Vault Secrets User</span>
+            <span class="badge badge-rbac">AcrPull</span>
+            <span class="badge badge-rbac">Storage Blob Data Reader</span>
+          </div>
+        </li>
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-code-branch mr-2 text-blue-500"></i>Federated Identities (OIDC)</div>
+          <div class="text-slate-600 text-sm">Azure DevOps / GitHub Actions exchange signed OIDC tokens for Entra tokens. No client secrets.</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-sec">Secretless CI/CD</span>
+            <span class="badge badge-policy">Short-lived tokens</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Control Plane -->
+    <section class="card p-5 lg:col-span-1">
+      <h2 class="section-title text-xl mb-1"><i class="fa-solid fa-sitemap mr-2 text-amber-600"></i>Control Plane</h2>
+      <p class="sub mb-4">Governs at scale. <span class="badge badge-policy">“Enforce least privilege &amp; compliance.”</span></p>
+      <ul class="list-line space-y-3">
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-diagram-project mr-2 text-amber-500"></i>Management Groups</div>
+          <div class="text-slate-600 text-sm">Platform → Non-Prod → Prod. Policy &amp; RBAC inheritance down to subscriptions.</div>
+        </li>
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-key mr-2 text-amber-500"></i>Azure RBAC</div>
+          <div class="text-slate-600 text-sm">Grant roles to <strong>Entra groups</strong>, UAMI, and OIDC identities at MG/Subscription/RG/Resource scope.</div>
+        </li>
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-shield-halved mr-2 text-amber-500"></i>Azure Policy</div>
+          <div class="text-slate-600 text-sm">Deny public IPs; enforce tags; private link required; <strong>DeployIfNotExists</strong> for Private DNS links.</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-policy">Deny</span>
+            <span class="badge badge-policy">Modify</span>
+            <span class="badge badge-policy">DeployIfNotExists</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Resource Plane -->
+    <section class="card p-5 lg:col-span-1">
+      <h2 class="section-title text-xl mb-1"><i class="fa-solid fa-cloud mr-2 text-purple-600"></i>Resource Plane</h2>
+      <p class="sub mb-4">Where workloads live: subscriptions, VNets, and services.</p>
+      <ul class="list-line space-y-3">
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-folder-tree mr-2 text-purple-500"></i>Subscriptions</div>
+          <div class="text-slate-600 text-sm">Connectivity (Hub), Management, Dev, QA, Prod.</div>
+        </li>
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-network-wired mr-2 text-purple-500"></i>Hub &amp; Spoke VNets</div>
+          <div class="text-slate-600 text-sm">Central egress via Firewall; Private Endpoints in spokes; Private DNS linked.</div>
+        </li>
+        <li>
+          <div class="font-semibold"><i class="fa-solid fa-boxes-stacked mr-2 text-purple-500"></i>Services</div>
+          <div class="text-slate-600 text-sm">Key Vault, ACR, AKS, Storage, SQL — public network disabled; PE required.</div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- MG Hierarchy -->
+    <section class="card p-5 lg:col-span-2">
+      <h2 class="section-title text-xl mb-1"><i class="fa-solid fa-layer-group mr-2 text-green-700"></i>Management Group Hierarchy &amp; Inheritance</h2>
+      <p class="sub mb-4">Apply guardrails at the highest scope possible for immediate compliance across all landing zones.</p>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold text-green-700"><i class="fa-solid fa-shield icon mr-2 text-green-600"></i>Platform MG</div>
+          <div class="text-sm text-slate-600">Connectivity + Management subscriptions</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-policy">Deny NIC Public IP</span>
+            <span class="badge badge-policy">Required Tags</span>
+            <span class="badge badge-policy">Private Link Only</span>
+          </div>
+        </div>
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold text-amber-700"><i class="fa-solid fa-flask mr-2 text-amber-500"></i>Non-Prod MG</div>
+          <div class="text-sm text-slate-600">Dev + QA subscriptions</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-policy">Audit Diagnostics</span>
+            <span class="badge badge-policy">Allowed Locations</span>
+          </div>
+        </div>
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold text-red-700"><i class="fa-solid fa-lock mr-2 text-red-500"></i>Prod MG</div>
+          <div class="text-sm text-slate-600">Prod subscription</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-policy">Deny Unapproved SKUs</span>
+            <span class="badge badge-policy">Mandatory Private DNS</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Zero Trust Chain -->
+    <section class="card p-5 lg:col-span-1">
+      <h2 class="section-title text-xl mb-1"><i class="fa-solid fa-link mr-2 text-slate-700"></i>Zero Trust Chain</h2>
+      <ol class="list-decimal list-inside text-slate-700 space-y-2">
+        <li>Authenticate (Entra ID)</li>
+        <li>Authorize (RBAC + Policy)</li>
+        <li>Isolate (Firewall + NSGs + Private Endpoints/DNS)</li>
+        <li>Observe (Defender for Cloud + Logs)</li>
+      </ol>
+    </section>
+
+    <!-- Network Boundary -->
+    <section class="card p-5 lg:col-span-2">
+      <h2 class="section-title text-xl mb-1"><i class="fa-solid fa-shield-halved mr-2 text-emerald-600"></i>Network Boundary</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold"><i class="fa-solid fa-fire-burner mr-2 text-emerald-600"></i>Azure Firewall</div>
+          <p class="text-slate-600 text-sm">Default route (0.0.0.0/0) from spokes via UDR; threat intelligence &amp; egress control.</p>
+        </div>
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold"><i class="fa-solid fa-shield-heart mr-2 text-emerald-600"></i>NSGs</div>
+          <p class="text-slate-600 text-sm">L3/L4 micro-segmentation per subnet; deny-by-default with minimal allows.</p>
+        </div>
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold"><i class="fa-solid fa-circle-nodes mr-2 text-emerald-600"></i>Private Link &amp; Private DNS</div>
+          <p class="text-slate-600 text-sm">PaaS traffic stays private; DNS linked across subscriptions with Policy remediation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Example: Prod Subscription Map -->
+    <section class="card p-5 lg:col-span-3">
+      <h2 class="section-title text-xl mb-1"><i class="fa-solid fa-diagram-next mr-2 text-indigo-600"></i>Example: Production Subscription</h2>
+      <div class="grid md:grid-cols-4 gap-4">
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold"><i class="fa-solid fa-cubes mr-2 text-indigo-600"></i>AKS: aks-prod-main</div>
+          <div class="mt-1 text-sm text-slate-600">Namespaces: <span class="font-medium">ns-payment</span>, <span class="font-medium">ns-shipping</span></div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-rbac">UAMI: uami-app-backend</span>
+            <span class="badge badge-policy">Restricted</span>
+          </div>
+        </div>
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold"><i class="fa-solid fa-database mr-2 text-indigo-600"></i>ACR: acr-prod-main</div>
+          <div class="mt-1 text-sm text-slate-600">Public network: <strong>Disabled</strong></div>
+          <div class="mt-2"><span class="badge badge-rbac">OIDC: app-cicd-prod (AcrPush)</span></div>
+        </div>
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold"><i class="fa-solid fa-key mr-2 text-indigo-600"></i>Key Vaults</div>
+          <div class="mt-1 text-sm text-slate-600">kv-prod-payment-secrets, kv-prod-shipping-secrets</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-rbac">UAMI: Secrets User</span>
+            <span class="badge badge-policy">Private Endpoint</span>
+          </div>
+        </div>
+        <div class="border rounded-xl p-4">
+          <div class="font-semibold"><i class="fa-solid fa-envelope-open-text mr-2 text-indigo-600"></i>Service Bus</div>
+          <div class="mt-1 text-sm text-slate-600">Queues: order-processing, shipping-notifications</div>
+          <div class="mt-2 space-x-2">
+            <span class="badge badge-rbac">uami-sb-worker: Data Receiver</span>
+            <span class="badge badge-rbac">uami-backend: Data Sender</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-7xl mx-auto text-center text-slate-500 text-sm mt-10">
+    <hr class="my-6 border-slate-200">
+    <p>© Your Company — Entra ID + Azure Landing Zone Mental Model</p>
+  </footer>
+</body>
+</html>

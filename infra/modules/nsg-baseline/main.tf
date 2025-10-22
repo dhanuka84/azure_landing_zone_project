@@ -33,5 +33,3 @@ resource "azurerm_network_security_rule" "inbound" {
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.this.name
 }
-
-output "id" { value = azurerm_network_security_group.this.id }
