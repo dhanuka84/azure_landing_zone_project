@@ -1,9 +1,8 @@
-// Remote state read: adjust to your backend values
-data "terraform_remote_state" "connectivity" {
+data "terraform_remote_state" "platform_connectivity" {
   backend = "azurerm"
   config = {
-    resource_group_name  = "rg-tfstates"
-    storage_account_name = "saterraformstate123"
+    resource_group_name  = "rg-prod-tfstate"
+    storage_account_name = "saprodstate123"
     container_name       = "tfstate"
     key                  = "platform_connectivity.tfstate"
   }
