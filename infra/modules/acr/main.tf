@@ -1,12 +1,8 @@
-locals { tags = merge({ managed_by = "terraform" }, var.tags) }
-
+# Hardened ACR example - wire into your existing attributes as needed
 resource "azurerm_container_registry" "this" {
-  name                = var.name
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku                 = var.sku
-  admin_enabled       = false
-  tags                = local.tags
+  name                          = var.name
+  resource_group_name           = var.resource_group_name
+  location                      = var.location
+  sku                           = var.sku
+  public_network_access_enabled = var.public_network_access_enabled
 }
-
-output "id" { value = azurerm_container_registry.this.id }

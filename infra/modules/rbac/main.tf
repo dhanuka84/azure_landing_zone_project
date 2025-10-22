@@ -1,11 +1,9 @@
-locals { tags = merge({ managed_by = "terraform" }, var.tags) }
-
-resource "azurerm_role_assignment" "this" {
-  for_each             = { for i, r in var.assignments : i => r }
-  scope                = each.value.scope_id
-  role_definition_name = each.value.role_definition
-  principal_id         = each.value.principal_objectId
-  # Note: azurerm_role_assignment doesn't support tags
+locals {
+  chosen_principal_id = coalesce(var.principal_id, var.principal_object_id)
 }
 
-output "ids" { value = [for k, v in azurerm_role_assignment.this : v.id] }
+resource "azurerm_role_assignment" "this" {
+  scope                = var.scope_id
+  role_definition_name = var.role_definition_name
+  principal_id         = local.chosen_principal_id
+}

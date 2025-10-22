@@ -1,183 +1,52 @@
+# Recommended Hardening Patch
 
-# Hands-On Guide: Building a Production-Ready Azure Landing Zone with Terraform and Entra ID
+This patch includes:
+1) **RBAC module** update to support `principal_id` (preferred) with fallback to legacy `principal_object_id`.
+   - Files: `infra/modules/rbac/variables.tf`, `infra/modules/rbac/main.tf`
+2) **ACR module** hardened to default `public_network_access_enabled = false`.
+   - Files: `infra/modules/acr/variables.tf`, `infra/modules/acr/main.tf`
+3) **Key Vault module** hardened to default `public_network_access_enabled = false`, plus purge protection/soft delete best-practice.
+   - Files: `infra/modules/keyvault/variables.tf`, `infra/modules/keyvault/main.tf`
+4) **Spoke NSGs example** using your `nsg-baseline` module to attach NSGs to app/AKS subnets.
+   - File: `infra/envs/prod/spoke-nsgs.tf` (replace TODOs with your actual subnet outputs)
 
-In today’s cloud-native world, a well-architected landing zone is the bedrock of a secure, scalable, and well-governed Azure environment. 
-In this guide, we’ll use a real, working repository — [azure_landing_zone_project](https://github.com/dhanuka84/azure_landing_zone_project) — 
-to deploy a production-ready landing zone built with **Terraform**, automated through **Azure DevOps**, and governed by **Microsoft Entra ID**.
+## What it adds (drop-in under your repo root):
 
----
+infra/modules/identity/ — User-Assigned Managed Identity (UAMI) module
 
-## 1. The Mental Model: What We’re Building
+infra/modules/nsg-baseline/ — reusable NSG + rules module
 
-### Governance
-- **Management Groups**: `Platform`, `Non-Production`, and `Production` — enforcing policies and compliance.
+infra/platform/connectivity/bastion-nsg.tf — required AzureBastionSubnet NSG rules
 
-### Networking
-- **Hub-and-Spoke Architecture**
-  - **Hub VNet (`vnet-hub-weu`)**
-    - `AzureFirewallSubnet`: hosts Azure Firewall (zone redundant)
-    - `GatewaySubnet`: reserved for VPN/ExpressRoute Gateway
-    - `AzureBastionSubnet`: secure RDP/SSH via Bastion
-    - **Private DNS Zones**: for private endpoints (Key Vault, ACR)
-  - **Spoke VNets** for `Dev`, `QA`, and `Prod` environments.
+infra/platform/connectivity/outputs.tf — exports Azure Firewall private IP
 
-### Subscriptions
-- `Connectivity` → Hub & shared resources  
-- `Dev`, `QA`, `Prod` → Isolated workloads and billing separation
+infra/platform/connectivity/private-dns-links.tf — example VNet link to Private DNS zones
 
----
+infra/envs/prod/data-remote.tf — reads connectivity remote state (edit backend values)
 
-## 2. Identity and Security with Microsoft Entra ID
+infra/envs/prod/app-identity.tf — UAMI + RBAC to KV/ACR (replace placeholders with your module outputs)
 
-| Identity | Purpose | Access Scope |
-|-----------|----------|--------------|
-| `app-cicd-pipeline` | CI/CD automation | Contributor (Dev/QA), AKS Admin (Prod) |
-| `app-backend-api` | Workload identity | Key Vault & ACR |
-| `app-monitor` | Monitoring | Reader |
+infra/envs/prod/udr.tf — egress 0.0.0.0/0 via Firewall using your existing modules/udr
 
-RBAC assignments via Terraform:
-```hcl
-module "rbac" {
-  assignments = [
-    {
-      scope_id           = module.acr.id
-      role_definition    = "AcrPush"
-      principal_objectId = var.spn_app_cicd_prod
-    },
-    {
-      scope_id           = module.kv.id
-      role_definition    = "Key Vault Secrets User"
-      principal_objectId = var.spn_key_vault_api_prod
-    }
-  ]
-}
-```
+infra/platform/mg/policy/assignments.tf — MG-level guardrails (deny NIC public IPs; enforce tags)
 
----
+infra/pipelines/azure-pipelines-oidc.yml — example pipeline using workload identity federation (keeps your original pipeline untouched)
 
-## 3. Project Structure
 
-```
-infra/
-├─ modules/
-│  ├─ networking-hub/
-│  ├─ azure-firewall/
-│  ├─ udr/
-│  ├─ networking-spoke/
-│  ├─ aks/ acr/ keyvault/ private-endpoint/ rbac/
-│
-├─ platform/
-│  ├─ mg/
-│  └─ connectivity/
-│
-├─ envs/
-│  ├─ dev/ qa/ prod/
-│
-└─ pipelines/
-   └─ azure-pipelines.yml
-```
+## Quick setup checklist:
 
----
+In infra/envs/prod/app-identity.tf, swap module.kv.id and module.acr.id for your actual module outputs.
 
-## 4. Step-by-Step Deployment
+Ensure infra/modules/rbac accepts a principal_id input; if not, add it and coalesce with any legacy principal_object_id.
 
-### Step 1 – Set Up Terraform Remote State
+Edit backend values in infra/envs/prod/data-remote.tf to point at your state storage.
 
-```bash
-az group create -n rg-tfstate -l westeurope
-az storage account create -n saterraformstate123 -g rg-tfstate   --sku Standard_LRS --encryption-services blob
-az storage container create -n tfstate --account-name saterraformstate123
-```
+Create an Entra workload-identity federated service connection in Azure DevOps named svc-conn-oidc and use infra/pipelines/azure-pipelines-oidc.yml.
 
-### Step 2 – Configure Azure DevOps
+(Optional) Add NSGs to other spokes via the nsg-baseline module and link Private DNS for all required zones or enforce via MG policy.
 
-**Service Connections**
-- `azrm-platform`: Hub subscription  
-- `azrm-nonprod`: Dev + QA  
-- `azrm-prod`: Production
-
-**Variable Group `vg-terraform`**
-```
-TF_STATE_RG=rg-tfstate
-TF_STATE_SA=saterraformstate123
-TF_STATE_CONTAINER=tfstate
-TF_STATE_KEY_PLATFORM_MG=platform_mg.tfstate
-TF_STATE_KEY_CONNECTIVITY=connectivity.tfstate
-TF_STATE_KEY_DEV=dev.tfstate
-TF_STATE_KEY_QA=qa.tfstate
-TF_STATE_KEY_PROD=prod.tfstate
-```
-
-### Step 3 – Run the Pipeline
-
-Stages executed automatically:
-
-| Stage | Description |
-|-------|--------------|
-| `platform_mg` | Creates Management Groups |
-| `platform_connectivity` | Deploys hub VNet, Firewall, and DNS |
-| `env_dev` | Deploys Dev spoke + UDR |
-| `env_qa` | Deploys QA spoke + ACR + UDR |
-| `env_prod` | Manual approval → deploys Prod AKS/ACR/KV/PEs + UDR |
-
----
-
-## 5. Inspecting the Hub
-
-```
-rg-platform-connectivity
- ├─ vnet-hub-weu
- │   ├─ AzureFirewallSubnet  → Azure Firewall
- │   ├─ GatewaySubnet        → VPN/ER Gateway (optional)
- │   └─ AzureBastionSubnet   → Bastion
- └─ Private DNS Zones        → For Key Vault, ACR, etc.
-```
-
-Hybrid connectivity can be added later with:
-```hcl
-resource "azurerm_virtual_network_gateway" "vpngw" { ... }
-```
-
----
-
-## 6. Environment Spokes
-
-Each environment (Dev, QA, Prod) uses the same pattern:
-- Spoke VNet and subnets
-- Peer to the Hub
-- UDR routes to Azure Firewall
-- Environment-specific resources (AKS, ACR, Key Vault, etc.)
-
----
-
-## 7. Validate Deployment
-
-```bash
-az network vnet list -g rg-platform-connectivity -o table
-az network firewall show -n afw-hub -g rg-platform-connectivity
-az aks get-credentials -n aks-prod-main -g rg-prod-app-services
-```
-
-Confirm traffic flows through the firewall by checking UDRs.
-
----
-
-## 8. Extending the Landing Zone
-
-- Add Azure Policies for tagging, logging, and TLS enforcement.  
-- Integrate Log Analytics for diagnostics.  
-- Add Private DNS links for cross-spoke name resolution.  
-- Deploy VPN or ExpressRoute Gateway in `GatewaySubnet`.
-
----
-
-## Conclusion
-
-You now have a **production-ready Azure Landing Zone** implemented as code:
-- Governance through Management Groups  
-- Secure networking with Firewall + UDRs  
-- Isolated Dev/QA/Prod spokes  
-- Automated CI/CD with Azure DevOps  
-- Centralized identity with Microsoft Entra ID  
-
-This architecture is scalable, auditable, and compliant — a true foundation for your enterprise workloads.
+## How to apply
+- Compare these files with your existing modules and **merge the changes** rather than a blind overwrite if you have additional attributes.
+- In your ACR and Key Vault modules, ensure any existing features are preserved while adding the `public_network_access_enabled` variable and attribute defaulted to `false`.
+- In `spoke-nsgs.tf`, replace placeholders (like `module.networking_spoke.app_subnet_id`) with the correct outputs or direct subnet IDs.
+- Commit as a PR (e.g., `feat/hardening-patch`) and run a plan.

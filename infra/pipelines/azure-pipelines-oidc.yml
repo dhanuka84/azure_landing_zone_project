@@ -1,0 +1,40 @@
+trigger:
+- main
+
+stages:
+- stage: platform_connectivity
+  displayName: "Deploy Platform Connectivity"
+  jobs:
+  - job: deploy
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: AzureCLI@2
+      displayName: Terraform Apply (Connectivity)
+      inputs:
+        azureSubscription: 'svc-conn-oidc'   # workload identity federated service connection
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -e
+          cd infra/platform/connectivity
+          terraform init -input=false
+          terraform apply -auto-approve
+
+- stage: env_prod
+  displayName: "Deploy Prod Environment"
+  dependsOn: platform_connectivity
+  jobs:
+  - job: deploy
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: AzureCLI@2
+      displayName: Terraform Apply (Prod)
+      inputs:
+        azureSubscription: 'svc-conn-oidc'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -e
+          cd infra/envs/prod
+          terraform init -input=false
+          terraform apply -auto-approve
