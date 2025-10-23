@@ -13,5 +13,3 @@ resource "azurerm_private_endpoint" "this" {
   }
   tags = local.tags
 }
-
-output "id" { value = azurerm_private_endpoint.this.id }

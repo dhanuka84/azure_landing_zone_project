@@ -7,5 +7,3 @@ resource "azurerm_role_assignment" "this" {
   principal_id         = each.value.principal_objectId
   # Note: azurerm_role_assignment doesn't support tags
 }
-
-output "ids" { value = [for k, v in azurerm_role_assignment.this : v.id] }

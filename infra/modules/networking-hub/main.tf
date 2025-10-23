@@ -39,5 +39,3 @@ resource "azurerm_private_dns_zone" "acr" {
   resource_group_name = var.resource_group_name
   tags                = local.tags
 }
-
-output "vnet_name" { value = azurerm_virtual_network.hub.name }

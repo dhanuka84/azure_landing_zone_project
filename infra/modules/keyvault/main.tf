@@ -11,5 +11,3 @@ resource "azurerm_key_vault" "this" {
   soft_delete_retention_days    = 7
   tags                          = local.tags
 }
-
-output "id" { value = azurerm_key_vault.this.id }

@@ -8,5 +8,3 @@ resource "azurerm_container_registry" "this" {
   admin_enabled       = false
   tags                = local.tags
 }
-
-output "id" { value = azurerm_container_registry.this.id }
