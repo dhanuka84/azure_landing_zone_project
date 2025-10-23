@@ -1,9 +1,16 @@
+# File: infra/envs/qa/main.tf
+
 module "spoke" {
   source              = "../../modules/networking-spoke"
   location            = var.location
   resource_group_name = var.resource_group_name
-  vnet_name           = "vnet-qa-spoke"
-  address_space       = ["10.30.0.0/16"]
+
+  # FIX 1: The module variable is 'name', not 'vnet_name'.
+  name                = "vnet-qa-spoke"
+
+  # FIX 2: The module variable 'address_space' expects a string, not a list of strings.
+  address_space       = "10.30.0.0/16"
+
   subnets = {
     "snet-aks-nodes"         = "10.30.1.0/24"
     "snet-private-endpoints" = "10.30.2.0/24"
