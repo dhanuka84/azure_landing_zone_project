@@ -56,22 +56,23 @@ module "kv" {
   tags                = var.tags
 }
 
+
 module "rbac" {
   source = "../../modules/rbac"
-  # FIX: Change from a LIST [] to a MAP {} with unique keys (e.g., "acr_push", "aks_user", "kv_secret_user")
+  # FIX: Change 'scope_id' to 'scope' to match the module's variable definition.
   assignments = {
     "acr_push" = {
-      scope_id           = module.acr.id
+      scope              = module.acr.id
       role_definition    = "AcrPush"
       principal_objectId = var.spn_app_cicd_prod
     },
     "aks_user" = {
-      scope_id           = module.aks.id
+      scope              = module.aks.id
       role_definition    = "Azure Kubernetes Service Cluster User Role"
       principal_objectId = var.spn_app_cicd_prod
     },
     "kv_secret_user" = {
-      scope_id           = module.kv.id
+      scope              = module.kv.id
       role_definition    = "Key Vault Secrets User"
       principal_objectId = var.spn_key_vault_api_prod
     }
