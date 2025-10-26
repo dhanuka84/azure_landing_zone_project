@@ -40,6 +40,13 @@ resource "azurerm_user_assigned_identity" "api" {
   tags                = var.tags
 }
 
+resource "azurerm_user_assigned_identity" "aks_cluster" {
+  name                = "uami-prod-aks-cluster"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}
+
 module "acr" {
   source              = "../../modules/acr"
   name                = "acrprodmain"
@@ -57,6 +64,8 @@ module "aks" {
   dns_prefix          = "aksprod"
   subnet_id           = module.spoke.subnet_ids["snet-aks-nodes"]
   tags                = var.tags
+
+  user_assigned_identity_id = azurerm_user_assigned_identity.aks_cluster.id
   # Note: recommend adding oidc_issuer_enabled=true to the AKS module
   # to allow workloads inside AKS to also use OIDC.
 }
@@ -73,15 +82,24 @@ module "kv" {
 module "rbac" {
   source = "../../modules/rbac"
   assignments = {
-    # REMOVED: "acr_push" and "aks_user" roles for the static CI/CD SPN.
-    # These are now assigned to the OIDC Service Connection identity
-    # in Azure AD, outside of this Terraform state.
-
-    # MODIFIED: Assigns role to the new UAMI, not a static SPN
+    # --- Existing assignment for the API workload ---
     "kv_secret_user" = {
       scope              = module.kv.id
       role_definition    = "Key Vault Secrets User"
       principal_objectId = azurerm_user_assigned_identity.api.principal_id
+    },
+
+    # --- NEW: Roles for the AKS Cluster UAMI ---
+    "aks_vnet_contributor" = {
+      scope              = module.spoke.subnet_ids["snet-aks-nodes"]
+      role_definition    = "Virtual Network Contributor"
+      principal_objectId = azurerm_user_assigned_identity.aks_cluster.principal_id
+    },
+    "aks_mi_operator" = {
+      # This role is assigned at the Resource Group scope
+      scope              = var.resource_group_name
+      role_definition    = "Managed Identity Operator"
+      principal_objectId = azurerm_user_assigned_identity.aks_cluster.principal_id
     }
   }
   tags = var.tags

@@ -15,3 +15,9 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "user_assigned_identity_id" {
+  type        = string
+  description = "The resource ID of the User-Assigned Managed Identity to use for the cluster."
+  default     = null
+}

@@ -16,7 +16,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     vnet_subnet_id = var.subnet_id
   }
 
-  identity { type = "SystemAssigned" }
+  identity {
+    type         = var.user_assigned_identity_id != null ? "UserAssigned" : "SystemAssigned"
+    identity_ids = var.user_assigned_identity_id != null ? [var.user_assigned_identity_id] : null
+  }
 
   network_profile { network_plugin = "azure" }
 
