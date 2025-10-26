@@ -228,3 +228,10 @@ You now have a **production-ready Azure Landing Zone** implemented as code:
 * Centralized identity with Microsoft Entra ID
 
 This architecture is scalable, auditable, and compliant — a true foundation for your enterprise workloads.
+
+## Operations before validate
+$ cd azure_landing_zone_project/infra/envs/prod
+$ rm -f .terraform.lock.hcl
+$ rm -rf .terraform
+$ terraform init
+$ terraform validate
