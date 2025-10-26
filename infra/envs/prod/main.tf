@@ -1,24 +1,42 @@
 locals {
-  # FIX: Change from a list ["10.10.0.0/16"] to a single string "10.10.0.0/16"
-  spoke_address_space = "10.10.0.0/16" 
+  spoke_address_space = "10.10.0.0/16"
   snet_aks_nodes_cidr = "10.10.1.0/24"
   snet_pe_cidr        = "10.10.2.0/24"
+  
+  # Define subnets using the new module structure
+  spoke_subnets = {
+    "snet-aks-nodes" = {
+      address_prefixes = [local.snet_aks_nodes_cidr]
+      private_endpoint_network_policies_enabled = false
+    },
+    "snet-private-endpoints" = {
+      address_prefixes = [local.snet_pe_cidr]
+      # This is critical for PEs to function
+      private_endpoint_network_policies_enabled = false 
+    }
+  }
 }
 
 module "spoke" {
   source              = "../../modules/networking-spoke"
   location            = var.location
   resource_group_name = var.resource_group_name
-  name           = "vnet-prod-spoke"
+  name                = "vnet-prod-spoke"
   address_space       = local.spoke_address_space
-  subnets = {
-    "snet-aks-nodes"         = local.snet_aks_nodes_cidr
-    "snet-private-endpoints" = local.snet_pe_cidr
-  }
+  subnets             = local.spoke_subnets # Use new local map
   hub_rg_name         = var.hub_rg_name
   hub_vnet_name       = var.hub_vnet_name
-  allow_gateway_transit = true
-  use_remote_gateways   = true
+  tags                = var.tags
+  
+  # NEW: Pass the DNS Zone IDs from the platform state
+  private_dns_zone_ids = data.terraform_remote_state.platform_connectivity.outputs.private_dns_zone_ids
+}
+
+# NEW: Create the User-Assigned Managed Identity for the application
+resource "azurerm_user_assigned_identity" "api" {
+  name                = "uami-prod-api-workload"
+  location            = var.location
+  resource_group_name = var.resource_group_name
   tags                = var.tags
 }
 
@@ -38,12 +56,10 @@ module "aks" {
   resource_group_name = var.resource_group_name
   dns_prefix          = "aksprod"
   subnet_id           = module.spoke.subnet_ids["snet-aks-nodes"]
-  node_count          = 3
-  vm_size             = "Standard_DS3_v2"
   tags                = var.tags
+  # Note: recommend adding oidc_issuer_enabled=true to the AKS module
+  # to allow workloads inside AKS to also use OIDC.
 }
-
-data "azurerm_client_config" "current" {}
 
 module "kv" {
   source              = "../../modules/keyvault"
@@ -51,30 +67,21 @@ module "kv" {
   location            = var.location
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  public_network_access_enabled = false
-  purge_protection_enabled     = true
   tags                = var.tags
 }
 
-
 module "rbac" {
   source = "../../modules/rbac"
-  # FIX: Change 'scope_id' to 'scope' to match the module's variable definition.
   assignments = {
-    "acr_push" = {
-      scope              = module.acr.id
-      role_definition    = "AcrPush"
-      principal_objectId = var.spn_app_cicd_prod
-    },
-    "aks_user" = {
-      scope              = module.aks.id
-      role_definition    = "Azure Kubernetes Service Cluster User Role"
-      principal_objectId = var.spn_app_cicd_prod
-    },
+    # REMOVED: "acr_push" and "aks_user" roles for the static CI/CD SPN.
+    # These are now assigned to the OIDC Service Connection identity
+    # in Azure AD, outside of this Terraform state.
+
+    # MODIFIED: Assigns role to the new UAMI, not a static SPN
     "kv_secret_user" = {
       scope              = module.kv.id
       role_definition    = "Key Vault Secrets User"
-      principal_objectId = var.spn_key_vault_api_prod
+      principal_objectId = azurerm_user_assigned_identity.api.principal_id
     }
   }
   tags = var.tags
@@ -88,8 +95,9 @@ module "pe_kv" {
   subnet_id           = module.spoke.subnet_ids["snet-private-endpoints"]
   target_resource_id  = module.kv.id
   subresource_names   = ["vault"]
-  # FIX: Add Private DNS Zone ID for Key Vault
-  private_dns_zone_id = data.terraform_remote_state.platform_connectivity.outputs.kv_private_dns_zone_id 
+  tags                = var.tags
+  # Note: private_dns_zone_id is no longer needed here,
+  # as the VNet link in the spoke module handles DNS resolution.
 }
 
 module "pe_acr" {
@@ -101,15 +109,15 @@ module "pe_acr" {
   target_resource_id  = module.acr.id
   subresource_names   = ["registry"]
   tags                = var.tags
-  private_dns_zone_id = data.terraform_remote_state.platform_connectivity.outputs.acr_private_dns_zone_id
 }
 
-# UDR: Default route to Azure Firewall
+
 module "udr_default" {
   source              = "../../modules/udr"
   name                = "rt-prod-default"
   location            = var.location
   resource_group_name = var.resource_group_name
-  firewall_private_ip = var.firewall_private_ip
+  # Get firewall IP from remote state
+  firewall_private_ip = data.terraform_remote_state.platform_connectivity.outputs.firewall_private_ip
   subnet_ids          = [module.spoke.subnet_ids["snet-aks-nodes"]]
 }

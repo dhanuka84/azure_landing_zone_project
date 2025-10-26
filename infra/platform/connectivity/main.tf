@@ -27,4 +27,11 @@ module "firewall" {
   tags                = { environment = "platform", layer = "security" }
 }
 
-output "firewall_private_ip" { value = module.firewall.private_ip }
+# NEW: Add mandatory NSG for Azure Bastion Subnet
+module "nsg_bastion" {
+  source              = "../../modules/nsg-bastion"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = module.hub.bastion_subnet_id
+  tags                = { environment = "platform", layer = "security" }
+}
