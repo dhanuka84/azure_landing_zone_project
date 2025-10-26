@@ -12,8 +12,8 @@ terraform {
   backend "azurerm" {}
   */
 }
-
+/*
 provider "azurerm" {
   features {}
   #use_oidc = true # Enable OIDC for credential-less auth
-}
+}*/
