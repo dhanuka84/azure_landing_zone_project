@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azure Mental Model Visualization</title>
+    <title>Modern Azure Entra ID & Governance Model (Zero Trust)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -64,26 +64,18 @@
             margin-right: 0.5rem;
             color: #3b82f6;
         }
-        .policy-tag {
-            background-color: #eef2ff;
-            color: #4f46e5;
+        .tag {
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 500;
             display: inline-block;
             margin-top: 0.5rem;
+            margin-right: 0.25rem;
         }
-        .rbac-tag {
-            background-color: #fefce8;
-            color: #a16207;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-block;
-            margin-top: 0.5rem;
-        }
+        .policy-tag { background-color: #eef2ff; color: #4f46e5; }
+        .rbac-tag { background-color: #fefce8; color: #a16207; }
+        .new-tag { background-color: #fdf2f8; color: #db2777; }
         .aks-policy-tag {
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
@@ -92,9 +84,7 @@
             display: inline-block;
             margin-top: 0.5rem;
         }
-        .privileged { background-color: #fef2f2; color: #dc2626; }
         .restricted { background-color: #ecfdf5; color: #16a34a; }
-        .baseline { background-color: #fffbeb; color: #f59e0b; }
 
     </style>
      <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,54 +93,63 @@
 </head>
 <body class="p-8">
 
-    <h1 class="text-3xl font-bold text-center mb-4 text-slate-800">Azure Enterprise Scaffolding Model</h1>
+    <h1 class="text-3xl font-bold text-center mb-4 text-slate-800">Azure Enterprise Scaffolding Model (Zero Trust)</h1>
     <p class="text-center text-slate-500 mb-12 max-w-3xl mx-auto">This diagram illustrates a well-architected Azure environment, showing the relationship between billing, identity, governance, and resource deployment across different environments.</p>
 
     <div class="max-w-7xl mx-auto">
-        <!-- Top Level -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="container-box">
                 <h2 class="title"><i class="fas fa-file-invoice-dollar icon"></i>Billing Account</h2>
                 <p class="purpose">Top-level financial ownership and cost aggregation for the entire organization.</p>
                 <span class="item-detail">e.g., Enterprise Agreement or Microsoft Customer Agreement</span>
             </div>
+
             <div class="container-box">
                 <h2 class="title"><i class="fas fa-users-cog icon"></i>Microsoft Entra ID Tenant</h2>
                 <p class="purpose">Single source of truth for identity and access management (IAM).</p>
                 <ul class="item-list mt-4">
                     <li><span class="item-title"><i class="fas fa-user icon"></i>Users and Groups</span> <span class="item-detail">e.g., "Dev Team Group", "AKS Admins Group"</span></li>
                     <li>
-                        <span class="item-title"><i class="fas fa-robot icon"></i>App Registrations / Service Principals</span>
-                        <span class="item-detail">Identities for automated processes and applications (scoped per environment).</span>
+                        <span class="item-title"><i class="fas fa-robot icon"></i>Modern Identities (Zero Trust)</span>
+                        <span class="item-detail">Credential-less identities for automated processes and applications.</span>
                         <ul class="item-list mt-2">
-                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-orange-600">-- CI/CD Pipeline --</span></li>
-                            <li><span class="item-title">app-cicd-prod:</span> <span class="item-detail">Pushes images to ACR & deploys to Prod AKS.</span></li>
-                            <li><span class="item-title">app-cicd-qa:</span> <span class="item-detail">Pushes images to ACR & deploys to QA AKS.</span></li>
-                            <li><span class="item-title">app-cicd-dev:</span> <span class="item-detail">Pushes images to ACR & deploys to Dev AKS.</span></li>
-                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-emerald-600">-- Shared Workloads --</span></li>
-                            <li><span class="item-title">key-vault-api-prod:</span> <span class="item-detail">Used by Payment & Shipping APIs for Key Vaults & Service Bus.</span></li>
-                            <li><span class="item-title">key-vault-api-qa:</span> <span class="item-detail">QA identity for APIs.</span></li>
-                            <li><span class="item-title">key-vault-api-dev:</span> <span class="item-detail">Dev identity for APIs.</span></li>
-                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-blue-600">-- Payment Service --</span></li>
-                            <li><span class="item-title">app-sb-worker-prod:</span> <span class="item-detail">Prod Payment Service Bus Worker.</span></li>
-                            <li><span class="item-title">app-sb-worker-qa:</span> <span class="item-detail">QA Payment Service Bus Worker.</span></li>
-                            <li><span class="item-title">app-sb-worker-dev:</span> <span class="item-detail">Dev Payment Service Bus Worker.</span></li>
+                            <li class="pt-2 border-t border-slate-200 mt-2">
+                                <span class="item-title text-green-600">-- Production Identities --</span>
+                                <ul class="item-list mt-2">
+                                    <li><span class="item-title">oidc-app-reg-prod:</span> <span class="item-detail">OIDC App Registration for Prod CI/CD pipeline.</span><div class="tag new-tag"><i class="fa-solid fa-key"></i> OIDC (Secret-less)</div></li>
+                                    <li><span class="item-title">uami-prod-api-workload:</span> <span class="item-detail">Managed Identity for Prod backend API.</span><div class="tag new-tag"><i class="fa-solid fa-id-card"></i> UAMI</div></li>
+                                    <li><span class="item-title">uami-prod-aks-cluster:</span> <span class="item-detail">Managed Identity for Prod AKS cluster control plane.</span><div class="tag new-tag"><i class="fa-solid fa-id-card"></i> UAMI</div></li>
+                                </ul>
+                            </li>
+                            <li class="pt-2 border-t border-slate-200 mt-2">
+                                <span class="item-title text-amber-600">-- Non-Production Identities --</span>
+                                <ul class="item-list mt-2">
+                                    <li><span class="item-title">oidc-app-reg-nonprod:</span> <span class="item-detail">OIDC App Registration for Dev/QA CI/CD pipeline.</span><div class="tag new-tag"><i class="fa-solid fa-key"></i> OIDC (Secret-less)</div></li>
+                                    <li><span class="item-title">uami-qa-api-workload:</span> <span class="item-detail">Managed Identity for QA backend API.</span><div class="tag new-tag"><i class="fa-solid fa-id-card"></i> UAMI</div></li>
+                                    <li><span class="item-title">uami-dev-api-workload:</span> <span class="item-detail">Managed Identity for Dev backend API.</span><div class="tag new-tag"><i class="fa-solid fa-id-card"></i> UAMI</div></li>
+                                </ul>
+                            </li>
+                            <li class="pt-2 border-t border-slate-200 mt-2">
+                                <span class="item-title text-indigo-600">-- Shared Services --</span>
+                                <ul class="item-list mt-2">
+                                    <li><span class="item-title">app-monitor-sp:</span> <span class="item-detail">Monitoring service identity.</span></li>
+                                </ul>
+                            </li>
                         </ul>
                     </li>
                 </ul>
             </div>
-        </div>
+            </div>
 
-        <!-- Management Group Hierarchy -->
         <div class="container-box">
             <h2 class="title"><i class="fas fa-sitemap icon"></i>Management Group Hierarchy</h2>
             <p class="purpose">Organizes subscriptions and applies universal security policies (Azure Policy) and access controls (RBAC).</p>
 
             <ul class="item-list mt-4">
-                <!-- Production -->
                 <li>
                     <div class="font-semibold text-lg text-green-700"><i class="fas fa-shield-alt icon text-green-500"></i>Management Group: "Production"</div>
                     <div class="policy-tag">Policy: Enforce strict security, logging, and disallow certain VM SKUs.</div>
+                    <div class="tag new-tag"><i class="fa-solid fa-ban"></i> NEW Policy: "Deny Public IP Creation" (Inherited)</div>
                     <ul class="item-list mt-2">
                         <li>
                             <span class="item-title"><i class="fas fa-cloud icon"></i>Subscription: "Prod Environment"</span>
@@ -161,45 +160,31 @@
                                     <ul class="item-list mt-2">
                                         <li>
                                             <span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-prod-main"</span>
-                                            <div class="rbac-tag">RBAC: Grant "app-cicd-prod" the Azure Kubernetes Service Cluster User Role.</div>
+                                            <div class="rbac-tag">Identity: Uses "uami-prod-aks-cluster" UAMI.</div>
                                             <ul class="item-list mt-2">
                                                 <li class="pb-2 border-b border-slate-200 mb-2">
                                                     <span class="item-title text-blue-600">Namespace: "ns-prod-payment"</span>
                                                     <div><span class="aks-policy-tag restricted">Policy: Restricted</span></div>
                                                     <ul class="item-list mt-2">
-                                                        <li><span class="item-title"><i class="fas fa-cogs icon text-blue-500"></i>Workload (API):</span> <span class="item-detail">Uses 'key-vault-api-prod' for Key Vault.</span></li>
-                                                        <li><span class="item-title"><i class="fas fa-cogs icon text-blue-500"></i>Workload (Worker):</span> <span class="item-detail">Uses 'app-sb-worker-prod' for Service Bus.</span></li>
+                                                        <li><span class="item-title"><i class="fas fa-cogs icon text-blue-500"></i>Workload (API):</span> <span class="item-detail">Uses 'uami-prod-api-workload' to access Key Vault.</span></li>
                                                     </ul>
                                                 </li>
                                                 <li>
                                                     <span class="item-title text-purple-600">Namespace: "ns-prod-shipping"</span>
                                                     <div><span class="aks-policy-tag restricted">Policy: Restricted</span></div>
                                                     <ul class="item-list mt-2">
-                                                        <li><span class="item-title"><i class="fas fa-truck icon text-purple-500"></i>Workload (API):</span> <span class="item-detail">Uses 'key-vault-api-prod' for Key Vault & Service Bus.</span></li>
+                                                        <li><span class="item-title"><i class="fas fa-truck icon text-purple-500"></i>Workload (API):</span> <span class="item-detail">Uses 'uami-prod-api-workload' to access Key Vault.</span></li>
                                                     </ul>
                                                 </li>
                                             </ul>
                                         </li>
                                         <li>
                                             <span class="item-title"><i class="fas fa-database icon"></i>Azure Container Registry: "acr-prod-main"</span>
-                                            <div class="rbac-tag">RBAC: Grant "app-cicd-prod" the AcrPush role.</div>
+                                            <div class="rbac-tag">RBAC: Grant "oidc-app-reg-prod" the AcrPush role.</div>
                                         </li>
                                         <li>
-                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vault: "kv-prod-payment-secrets"</span>
-                                            <div class="rbac-tag">RBAC: Grant "key-vault-api-prod" Secrets User role.</div>
-                                        </li>
-                                         <li>
-                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vault: "kv-prod-shipping-secrets"</span>
-                                            <div class="rbac-tag">RBAC: Grant "key-vault-api-prod" Secrets User role.</div>
-                                        </li>
-                                        <li>
-                                            <span class="item-title"><i class="fas fa-envelope-open-text icon"></i>Service Bus: "sb-prod-main"</span>
-                                            <ul class="item-list mt-2">
-                                                <li><span class="item-title">Queue: "order-processing"</span></li>
-                                                <li><span class="item-title">Queue: "shipping-notifications"</span></li>
-                                            </ul>
-                                            <div class="rbac-tag">RBAC: Grant "app-sb-worker-prod" Data Receiver role.</div>
-                                            <div class="rbac-tag">RBAC: Grant "key-vault-api-prod" Data Sender role.</div>
+                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vault: "kv-prod-secrets"</span>
+                                            <div class="rbac-tag">RBAC: Grant "uami-prod-api-workload" Secrets User role.</div>
                                         </li>
                                     </ul>
                                 </li>
@@ -207,10 +192,10 @@
                         </li>
                     </ul>
                 </li>
-                <!-- Non-Production -->
                 <li>
                     <div class="font-semibold text-lg text-amber-700"><i class="fas fa-flask icon text-amber-500"></i>Management Group: "Non-Production"</div>
                      <div class="policy-tag">Policy: More flexible policies for development and testing.</div>
+                     <div class="tag new-tag"><i class="fa-solid fa-ban"></i> NEW Policy: "Deny Public IP Creation" (Inherited)</div>
                     <ul class="item-list mt-2">
                         <li>
                             <span class="item-title"><i class="fas fa-vial icon"></i>Subscription: "QA Environment"</span>
@@ -222,8 +207,8 @@
                                          <li><span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-qa-main"</span></li>
                                          <li><span class="item-title"><i class="fas fa-database icon"></i>ACR: "acr-qa-main"</span></li>
                                          <li>
-                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vaults, Service Bus...</span>
-                                            <div class="rbac-tag">RBAC: Assign roles to 'key-vault-api-qa', 'app-cicd-qa', etc.</div>
+                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vaults...</span>
+                                            <div class="rbac-tag">RBAC: Assign roles to "oidc-app-reg-nonprod" & "uami-qa-api-workload".</div>
                                         </li>
                                      </ul>
                                 </li>
@@ -238,10 +223,6 @@
                                       <ul class="item-list mt-2">
                                          <li><span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-dev-user-a"</span></li>
                                          <li><span class="item-title"><i class="fas fa-database icon"></i>ACR: "acr-dev-user-a"</span></li>
-                                         <li>
-                                            <span class="item-title"><i class="fas fa-key icon"></i>Key Vaults, Service Bus...</span>
-                                            <div class="rbac-tag">RBAC: Assign roles to dev identities.</div>
-                                        </li>
                                       </ul>
                                 </li>
                             </ul>
@@ -253,5 +234,3 @@
     </div>
 </body>
 </html>
-
-

@@ -31,31 +31,53 @@ to deploy a production-ready landing zone built with Terraform, automated throug
 
 ---
 
-## **2\. Identity and Security with Microsoft Entra ID**
+## 2. Modern Identity: Credential-less & Zero Trust
 
-| Identity | Purpose | Access Scope |
-| :---- | :---- | :---- |
-| app-cicd-pipeline | CI/CD automation | Contributor (Dev/QA), AKS Admin (Prod) |
-| app-backend-api | Workload identity | Key Vault & ACR |
-| app-monitor | Monitoring | Reader |
+This architecture moves away from static secrets for both the pipeline and the application. Here is a clear breakdown of the identities, their corresponding Entra ID objects, and their relationships.
 
-RBAC assignments via Terraform:
+| Identity Purpose | AzDevOps Object | Entra ID Object | Key Identifier(s) | Authentication |
+| :--- | :--- | :--- | :--- | :--- |
+| **CI/CD Pipeline** | Service Connection (e.g., `azrm-oidc-prod`) | **App Registration** | **Client ID** (Application ID) | **OIDC (Federated)** |
+| **App Workload** | N/A | **User-Assigned Managed Identity** (e.g., `uami-prod-api`) | **Client ID** & Principal ID | **Managed Identity** |
+| **Monitoring** | N/A | **App Registration / Service Principal** (e.g., `app-monitor-sp`) | **Client ID** (Application ID) | Service Principal (Secret) |
 
-Terraform
+**Key Relationships Explained:**
 
-module "rbac" {  
-  assignments \= \[  
-    {  
-      scope\_id           \= module.acr.id  
-      role\_definition    \= "AcrPush"  
-      principal\_objectId \= var.spn\_app\_cicd\_prod  
-    },  
-    {  
-      scope\_id           \= module.kv.id  
-      role\_definition    \= "Key Vault Secrets User"  
-      principal\_objectId \= var.spn\_key\_vault\_api\_prod  
-    }  
-  \]  
+* **CI/CD Pipeline (OIDC):**
+    1.  An **App Registration** is created in Microsoft Entra ID. This gives it a unique **Client ID** (Application ID).
+    2.  Instead of a secret, a **Federated Credential** is created on this App Registration, establishing a trust relationship with the Azure DevOps service connection.
+    3.  The Azure DevOps **Service Connection** (e.g., `azrm-oidc-prod`) is configured with the App's **Client ID**, **Tenant ID**, and **Subscription ID**.
+    4.  When the pipeline runs, it uses the service connection to get a token from Entra ID via OIDC, *without* a static secret.
+    5.  RBAC roles (like `AcrPush`) are assigned to this App Registration's **Service Principal** in Entra ID.
+
+* **App Workload (UAMI):**
+    1.  Terraform creates a **User-Assigned Managed Identity** (UAMI), e.g., `uami-prod-api-workload`.
+    2.  This UAMI has its own **Client ID** and **Principal ID**.
+    3.  Terraform assigns RBAC roles (like `Key Vault Secrets User`) to this UAMI's **Principal ID**.
+    4.  The application (e.g., in AKS) is configured to *use* this UAMI, allowing it to acquire tokens for Azure services automatically.
+
+**Example from `prod/main.tf`:**
+```hcl
+# 1. Create the User-Assigned Managed Identity for the workload
+resource "azurerm_user_assigned_identity" "api" {
+  name                = "uami-prod-api-workload"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+}
+
+# 2. RBAC is assigned to the UAMI's Principal ID
+module "rbac" {
+  source = "../../modules/rbac"
+  assignments = {
+    # Grant the UAMI 'Key Vault Secrets User' role
+    "kv_secret_user" = {
+      scope              = module.kv.id
+      role_definition    = "Key Vault Secrets User"
+      principal_objectId = azurerm_user_assigned_identity.api.principal_id
+    }
+    # NOTE: 'AcrPush' is no longer here. It's on the OIDC
+    # identity in Entra ID.
+  }
 }
 
 ### **What each identity type means**
