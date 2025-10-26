@@ -51,7 +51,8 @@ resource "azurerm_subnet" "this" {
   address_prefixes     = each.value.address_prefixes
 
   # NEW: Disable PE network policies on subnets that will host them
-  private_endpoint_network_policies_enabled = try(each.value.private_endpoint_network_policies_enabled, true)
+  private_endpoint_network_policies = try(each.value.private_endpoint_network_policies, true)
+
 }
 
 # NEW: Associate the default NSG with all created subnets
