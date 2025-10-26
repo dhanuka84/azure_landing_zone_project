@@ -58,6 +58,49 @@ module "rbac" {
   \]  
 }
 
+### **What each identity type means**
+
+| Type | Lifecycle & characteristics | Key properties |
+| :---- | :---- | :---- |
+| **System-Assigned Managed Identity** | Created and tied to a specific Azure resource (e.g., an AKS cluster). When the resource is deleted, the identity is also deleted. [Microsoft Learn+2Microsoft Learn+2](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview?utm_source=chatgpt.com) | • One identity per resource. • Cannot be shared across resources. • Easier to enable (just toggle on). |
+| **User-Assigned Managed Identity** | Created independently as its own Azure resource. It can be assigned to one or more Azure resources. Lifespan is independent of the resources. [Microsoft Learn+1](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview?utm_source=chatgpt.com) | • Can be used by multiple resources. • Pre-provisioning possible (identity exists ahead of resource creation). • More granular sharing & reuse. |
+
+---
+
+### **When to choose which**
+
+From Microsoft’s best-practice guidance and community experience: [Microsoft Learn+2John Folberth+2](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/managed-identity-best-practice-recommendations?utm_source=chatgpt.com)
+
+### **Choose User-Assigned Managed Identity (UAMI) when:**
+
+* You have **multiple resources** (e.g., clusters, node-pools, VMs) that need **the same** access to downstream resources (KeyVault, Blob, etc). UAMI allows sharing one identity across many. [Microsoft Learn+1](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/managed-identity-best-practice-recommendations?utm_source=chatgpt.com)
+
+* You want to **pre-assign role-based access control (RBAC)** to an identity *before* creating the resource, to avoid “chicken and egg” issues when provisioning infrastructure. [Microsoft Learn](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/managed-identity-best-practice-recommendations?utm_source=chatgpt.com)
+
+* You want identity management decoupled from the resource life-cycle (so deleting a cluster doesn’t delete the identity).
+
+* You want to reduce the number of identities/objects in Microsoft Entra ID (avoiding too many SAMIs hitting quotas) or want clearer identity management at enterprise scale. [Reddit](https://www.reddit.com/r/AZURE/comments/1g44efo/monitoring_agent_system_assigned_identity_vs_user/?utm_source=chatgpt.com)
+
+### **Choose System-Assigned Managed Identity (SAMI) when:**
+
+* The identity is very tightly scoped to a single resource, and you don’t need reuse across other resources.
+
+* You want lifecycle alignment: delete the resource → identity is removed too (reducing “orphan” identities).
+
+* Simpler scenario where identity sharing, reuse and pre-provisioning are not required.
+
+---
+
+### **Best for AKS clusters**
+
+For an AKS cluster, here are considerations:
+
+* According to the official AKS docs: You *can* use either SAMI or UAMI for AKS. But when you choose UAMI, it has to exist before you create the cluster. [Microsoft Learn](https://learn.microsoft.com/en-us/azure/aks/use-managed-identity?utm_source=chatgpt.com)
+
+* If you have a simple AKS deployment with isolated cluster and minimal downstream dependencies, SAMI may suffice.
+
+* But in most **enterprise/production** scenarios (especially like your “landing-zone” style infrastructure) where you have: multiple node pools, multiple clusters, shared ACR/KeyVault/monitoring roles, desire for consistent identity management across subscriptions/environments — a **User-Assigned Managed Identity** becomes a stronger choice.
+
 ---
 
 ## **3\. Project Structure**
