@@ -21,14 +21,13 @@ stages:
     steps:
     - task: TerraformInstaller@1
       inputs:
-        terraformVersion: '1.13.4' # <-- LATEST TF VERSION
+        terraformVersion: '1.13.4'
     - task: TerraformCLI@1
       displayName: "Init (MG)"
       inputs:
         command: 'init'
         workingDirectory: 'infra/platform/mg'
         backendType: 'azurerm'
-        # OIDC is enabled on the provider, init uses the service connection for backend access
         serviceConnection: $(SERVICE_CONNECTION_PLATFORM) 
         ensureBackend: true
         backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
@@ -64,7 +63,7 @@ stages:
     steps:
     - task: TerraformInstaller@1
       inputs:
-        terraformVersion: '1.13.4' # <-- LATEST TF VERSION
+        terraformVersion: '1.13.4'
     - task: TerraformCLI@1
       displayName: "Init (Connectivity)"
       inputs:
@@ -77,6 +76,11 @@ stages:
         backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
         backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
         backendAzureRmKey: '$(TF_STATE_KEY_CONNECTIVITY)'
+    - task: TerraformCLI@1
+      displayName: "Validate (Connectivity)"
+      inputs:
+        command: 'validate'
+        workingDirectory: 'infra/platform/connectivity'
     - task: TerraformCLI@1
       displayName: "Plan (Connectivity)"
       inputs:
@@ -92,8 +96,134 @@ stages:
         serviceConnection: $(SERVICE_CONNECTION_PLATFORM)
         commandOptions: 'tfplan'
 
-# ... (Stages for dev, qa, prod are updated similarly, using
-#      terraformVersion: '1.13.4'
-#      serviceConnection: $(SERVICE_CONNECTION_NONPROD) or
-#      serviceConnection: $(SERVICE_CONNECTION_PROD)
-#      and removing environmentServiceName)
+- stage: env_dev
+  displayName: "Env :: Dev"
+  dependsOn: platform_connectivity
+  jobs:
+  - job: tf
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: '1.13.4'
+    - task: TerraformCLI@1
+      displayName: "Init (Dev)"
+      inputs:
+        command: 'init'
+        workingDirectory: 'infra/envs/dev'
+        backendType: 'azurerm'
+        serviceConnection: $(SERVICE_CONNECTION_NONPROD)
+        ensureBackend: true
+        backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+        backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+        backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+        backendAzureRmKey: '$(TF_STATE_KEY_DEV)'
+    - task: TerraformCLI@1
+      displayName: "Validate (Dev)"
+      inputs:
+        command: 'validate'
+        workingDirectory: 'infra/envs/dev'
+    - task: TerraformCLI@1
+      displayName: "Plan (Dev)"
+      inputs:
+        command: 'plan'
+        workingDirectory: 'infra/envs/dev'
+        serviceConnection: $(SERVICE_CONNECTION_NONPROD)
+        commandOptions: '-var-file=dev.tfvars -out=tfplan'
+    - task: TerraformCLI@1
+      displayName: "Apply (Dev)"
+      inputs:
+        command: 'apply'
+        workingDirectory: 'infra/envs/dev'
+        serviceConnection: $(SERVICE_CONNECTION_NONPROD)
+        commandOptions: 'tfplan'
+
+- stage: env_qa
+  displayName: "Env :: QA"
+  dependsOn: env_dev
+  jobs:
+  - job: tf
+    pool: { vmImage: 'ubuntu-latest' }
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: '1.13.4'
+    - task: TerraformCLI@1
+      displayName: "Init (QA)"
+      inputs:
+        command: 'init'
+        workingDirectory: 'infra/envs/qa'
+        backendType: 'azurerm'
+        serviceConnection: $(SERVICE_CONNECTION_NONPROD)
+        ensureBackend: true
+        backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+        backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+        backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+        backendAzureRmKey: '$(TF_STATE_KEY_QA)'
+    - task: TerraformCLI@1
+      displayName: "Validate (QA)"
+      inputs:
+        command: 'validate'
+        workingDirectory: 'infra/envs/qa'
+    - task: TerraformCLI@1
+      displayName: "Plan (QA)"
+      inputs:
+        command: 'plan'
+        workingDirectory: 'infra/envs/qa'
+        serviceConnection: $(SERVICE_CONNECTION_NONPROD)
+        commandOptions: '-var-file=qa.tfvars -out=tfplan'
+    - task: TerraformCLI@1
+      displayName: "Apply (QA)"
+      inputs:
+        command: 'apply'
+        workingDirectory: 'infra/envs/qa'
+        serviceConnection: $(SERVICE_CONNECTION_NONPROD)
+        commandOptions: 'tfplan'
+
+- stage: env_prod
+  displayName: "Env :: Prod"
+  dependsOn: env_qa
+  jobs:
+  # Use a 'deployment' job to enable manual approvals
+  - deployment: tf_prod
+    displayName: "Terraform Apply (Prod)"
+    pool: { vmImage: 'ubuntu-latest' }
+    environment: 'production' # This enables manual approval checks
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: '1.13.4'
+          - task: TerraformCLI@1
+            displayName: "Init (Prod)"
+            inputs:
+              command: 'init'
+              workingDirectory: 'infra/envs/prod'
+              backendType: 'azurerm'
+              serviceConnection: $(SERVICE_CONNECTION_PROD)
+              ensureBackend: true
+              backendAzureRmResourceGroupName: '$(TF_STATE_RG)'
+              backendAzureRmStorageAccountName: '$(TF_STATE_SA)'
+              backendAzureRmContainerName: '$(TF_STATE_CONTAINER)'
+              backendAzureRmKey: '$(TF_STATE_KEY_PROD)'
+          - task: TerraformCLI@1
+            displayName: "Validate (Prod)"
+            inputs:
+              command: 'validate'
+              workingDirectory: 'infra/envs/prod'
+          - task: TerraformCLI@1
+            displayName: "Plan (Prod)"
+            inputs:
+              command: 'plan'
+              workingDirectory: 'infra/envs/prod'
+              serviceConnection: $(SERVICE_CONNECTION_PROD)
+              commandOptions: '-var-file=prod.tfvars -out=tfplan'
+          - task: TerraformCLI@1
+            displayName: "Apply (Prod)"
+            inputs:
+              command: 'apply'
+              workingDirectory: 'infra/envs/prod'
+              serviceConnection: $(SERVICE_CONNECTION_PROD)
+              commandOptions: 'tfplan'
