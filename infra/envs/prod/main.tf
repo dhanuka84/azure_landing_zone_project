@@ -2,6 +2,8 @@ locals {
   spoke_address_space = "10.10.0.0/16"
   snet_aks_nodes_cidr = "10.10.1.0/24"
   snet_pe_cidr        = "10.10.2.0/24"
+  snet_app_gw_cidr    = "10.10.3.0/24" # <-- NEW
+  snet_apim_cidr      = "10.10.4.0/24" # <-- NEW
   
   # Define subnets using the new module structure
   spoke_subnets = {
@@ -13,8 +15,31 @@ locals {
       address_prefixes = [local.snet_pe_cidr]
       # This is critical for PEs to function
       private_endpoint_network_policies_enabled = false 
+    },
+    "snet-app-gateway" = { # <-- NEW
+      address_prefixes = [local.snet_app_gw_cidr]
+      associate_default_nsg = false # Opt-out of default NSG
+    },
+    "snet-apim" = { # <-- NEW
+      address_prefixes = [local.snet_apim_cidr]
+      associate_default_nsg = false # Opt-out of default NSG
     }
   }
+}
+
+# --- NEW NSG MODULES ---
+module "nsg_app_gateway" {
+  source              = "../../modules/nsg-app-gateway"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}
+
+module "nsg_apim" {
+  source              = "../../modules/nsg-apim"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
 }
 
 module "spoke" {
@@ -30,6 +55,60 @@ module "spoke" {
   
   # NEW: Pass the DNS Zone IDs from the platform state
   private_dns_zone_ids = data.terraform_remote_state.platform_connectivity.outputs.private_dns_zone_ids
+
+  # NEW: Attach the VNet to the DDoS Plan
+  ddos_protection_plan_id = data.terraform_remote_state.platform_connectivity.outputs.ddos_protection_plan_id
+}
+
+# --- NEW NSG ASSOCIATIONS ---
+# Associate the custom NSGs to the new subnets
+resource "azurerm_subnet_network_security_group_association" "app_gw" {
+  subnet_id                 = module.spoke.subnet_ids["snet-app-gateway"]
+  network_security_group_id = module.nsg_app_gateway.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "apim" {
+  subnet_id                 = module.spoke.subnet_ids["snet-apim"]
+  network_security_group_id = module.nsg_apim.id
+}
+
+# --- NEW PUBLIC IP FOR APP GATEWAY ---
+resource "azurerm_public_ip" "app_gw" {
+  name                = "pip-prod-app-gw"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = var.tags
+}
+
+# --- NEW APIM & APP GATEWAY MODULES ---
+module "apim" {
+  source              = "../../modules/apim" # (You need to create this)
+  name                = "apim-prod-main"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  publisher_name      = "My Company"
+  publisher_email     = "admin@company.com"
+  sku_name            = "Developer_1" # Start with Developer, use Premium for VNet
+  vnet_type           = "Internal"
+  subnet_id           = module.spoke.subnet_ids["snet-apim"]
+  tags                = var.tags
+}
+
+module "app_gateway" {
+  source                 = "../../modules/app-gateway"
+  name                   = "appgw-prod-main"
+  location               = var.location
+  resource_group_name    = var.resource_group_name
+  subnet_id              = module.spoke.subnet_ids["snet-app-gateway"]
+  public_ip_address_id   = azurerm_public_ip.app_gw.id
+  ssl_certificate_name   = "my-ssl-cert" # You must add this cert to the AppGW
+  apim_gateway_url       = module.apim.gateway_url_hostname # Output from your APIM module
+  tags                   = var.tags
+
+  # This points to a secret you will need to create in your Key Vault.
+  key_vault_secret_id_ssl_cert = "${module.kv.id}/secrets/appgw-ssl-cert"
 }
 
 # NEW: Create the User-Assigned Managed Identity for the application

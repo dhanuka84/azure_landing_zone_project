@@ -4,6 +4,16 @@ resource "azurerm_virtual_network" "spoke" {
   resource_group_name = var.resource_group_name
   address_space       = [var.address_space]
   tags                = var.tags
+  
+  # NEW: Associate the VNet with the DDoS Plan
+  # This dynamic block only adds the plan if the variable is not null.
+  dynamic "ddos_protection_plan" {
+    for_each = var.ddos_protection_plan_id != null ? [1] : []
+    content {
+      enable = true
+      id     = var.ddos_protection_plan_id
+    }
+  }
 }
 
 data "azurerm_virtual_network" "hub" {
@@ -55,9 +65,22 @@ resource "azurerm_subnet" "this" {
 
 }
 
+/*
 # NEW: Associate the default NSG with all created subnets
 resource "azurerm_subnet_network_security_group_association" "this" {
   for_each                  = azurerm_subnet.this
+  subnet_id                 = each.value.id
+  network_security_group_id = azurerm_network_security_group.default.id
+}
+*/
+# MODIFIED: Only associate the default NSG if 'associate_default_nsg' is true
+resource "azurerm_subnet_network_security_group_association" "this" {
+  for_each = {
+    # Create a map of subnets where associate_default_nsg is true
+    for k, v in azurerm_subnet.this : k => v
+    if try(var.subnets[k].associate_default_nsg, true) == true
+  }
+  
   subnet_id                 = each.value.id
   network_security_group_id = azurerm_network_security_group.default.id
 }
