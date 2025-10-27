@@ -1,222 +1,56 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" version="28.2.8">
-  <diagram name="Azure Enterprise Scaffolding – Entra ID (Zero Trust)" id="0">
-    <mxGraphModel dx="967" dy="552" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="2400" math="0" shadow="0" adaptiveColors="none">
+  <diagram name="Microsoft Entra ID — Zero Trust Identity Model" id="0">
+    <mxGraphModel dx="748" dy="518" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0" adaptiveColors="none">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="billing" value="Billing Account&#xa;Enterprise Agreement / MCA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#94a3b8;fontSize=14;fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="40" y="20" width="430" height="80" as="geometry" />
+        <mxCell id="title" value="Microsoft Entra ID — Zero Trust Identity Model (UAMI &amp; OIDC)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="20" y="10" width="700" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="entra" value="Microsoft Entra ID Tenant&#xa;&lt;i&gt;Single source of truth for identity and access management (IAM).&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eef2ff;strokeColor=#6366f1;fontSize=16;fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="50" y="110" width="740" height="620" as="geometry" />
+        <mxCell id="tenant" value="Entra ID Tenant&#xa;(Users, Groups, Workload Identities)" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=6;" parent="1" vertex="1">
+          <mxGeometry x="20" y="70" width="360" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="entra_users" value="Users &amp; Groups&#xa;e.g., &quot;Dev Team Group&quot;, &quot;AKS Admins Group&quot;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c7d2fe;fontSize=13" parent="entra" vertex="1">
-          <mxGeometry x="60" y="10" width="310" height="70" as="geometry" />
+        <mxCell id="groups" value="Groups&#xa;- Dev Team Group&#xa;- AKS Admins Group&#xa;(Access via PIM)" style="rounded=1;fillColor=#f0f9ff;strokeColor=#0284c7;align=left;verticalAlign=top;spacing=6;" parent="1" vertex="1">
+          <mxGeometry x="20" y="180" width="360" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="entra_modern" value="Modern Identities (Zero Trust)&#xa;Identities for automation and workloads, replacing static secrets." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c7d2fe;fontSize=13" parent="entra" vertex="1">
-          <mxGeometry x="21.14" y="90" width="697.71" height="494.23" as="geometry" />
+        <mxCell id="workload_identities" value="        Workload Identities (Credential-less)" style="rounded=1;dashed=1;fillColor=#ffffff;strokeColor=#000000;align=left;verticalAlign=top;spacing=6;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="20" y="310" width="360" height="340" as="geometry" />
         </mxCell>
-        <mxCell id="entra_ci_header" value="-- CI/CD Pipeline --   (OIDC / Workload Identity Federation)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fde68a;strokeColor=#f59e0b;fontSize=12;fontStyle=1" parent="entra_modern" vertex="1">
-          <mxGeometry x="10.57" y="14.534502682909979" width="676.57" height="42.37427837781821" as="geometry" />
+        <mxCell id="cicd_oidc" value="CI/CD Pipeline (OIDC Federation)" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=6;" parent="workload_identities" vertex="1">
+          <mxGeometry x="20" y="40" width="320" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="entra_ci_body" value="AzDevOps Service Connection links to Entra ID App Registration.&#xa;Auth: Client ID + Federated Credential (No Secret)." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#fdba74;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="10.571363636363635" y="68.2940522269982" width="676.5672727272727" height="58.14470588235296" as="geometry" />
+        <mxCell id="cicd_items" value="- azdo-oidc-platform&#xa;- azdo-oidc-nonprod&#xa;- azdo-oidc-prod&#xa;(Federated Credential - No Secrets)" style="rounded=0;fillColor=#ffffff;strokeColor=none;align=left;verticalAlign=top;spacing=4;fontSize=11;" parent="cicd_oidc" vertex="1">
+          <mxGeometry x="10" y="30" width="300" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="oidc_prod" value="oidc-app-reg-nonprod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="31.71" y="136.59" width="211.43" height="33.41" as="geometry" />
+        <mxCell id="app_uami" value="Application Workloads (UAMI)" style="rounded=1;fillColor=#dcfce7;strokeColor=#16a34a;align=left;verticalAlign=top;spacing=6;" parent="workload_identities" vertex="1">
+          <mxGeometry x="20" y="150" width="320" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="oidc_nonprod" value="oidc-app-reg-prod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#f59e0b;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="428.86" y="136.59" width="211.43" height="33.41" as="geometry" />
+        <mxCell id="app_uami_items" value="- uami-prod-api-workload&#xa;- uami-qa-api-workload&#xa;- uami-dev-api-workload&#xa;(User-Assigned Managed Identity)" style="rounded=0;fillColor=#ffffff;strokeColor=none;align=left;verticalAlign=top;spacing=4;fontSize=11;" parent="app_uami" vertex="1">
+          <mxGeometry x="10" y="30" width="300" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="workload_header" value="-- Application Workloads --" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e9d5ff;strokeColor=#a855f7;fontSize=12;fontStyle=1" parent="entra_modern" vertex="1">
-          <mxGeometry x="10.57" y="194.78" width="676.57" height="25.22" as="geometry" />
+        <mxCell id="infra_uami" value="Infrastructure Services (UAMI)" style="rounded=1;fillColor=#e0f2fe;strokeColor=#0ea5e9;align=left;verticalAlign=top;spacing=6;" parent="workload_identities" vertex="1">
+          <mxGeometry x="20" y="260" width="320" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="uami_prod_api" value="uami-prod-api-workload (UAMI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#d946ef;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="31.71409090909091" y="268.9192647058824" width="253.71272727272728" height="43.608529411764714" as="geometry" />
+        <mxCell id="infra_uami_items" value="- uami-prod-appgw (For Key Vault Access)" style="rounded=0;fillColor=#ffffff;strokeColor=none;align=left;verticalAlign=top;spacing=4;fontSize=11;" parent="infra_uami" vertex="1">
+          <mxGeometry x="10" y="30" width="300" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="uami_qa_api" value="uami-qa-api-workload (UAMI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#d946ef;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="306.56954545454545" y="268.9192647058824" width="253.71272727272728" height="43.608529411764714" as="geometry" />
+        <mxCell id="rbac" value="    Typical RBAC Assignments (Least Privilege)" style="rounded=1;fillColor=#fefce8;strokeColor=#a16207;align=left;verticalAlign=top;spacing=8;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="420" y="70" width="420" height="240" as="geometry" />
         </mxCell>
-        <mxCell id="uami_dev_api" value="uami-dev-api-workload (UAMI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#d946ef;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="31.71409090909091" y="319.79588235294136" width="253.71272727272728" height="43.608529411764714" as="geometry" />
+        <mxCell id="rbac_items" value="CI/CD OIDC Identities (Assigned OUTSIDE TF State):&#xa;&#xa;  • azdo-oidc-prod SP → AcrPush (Prod ACR), AKS Cluster Admin&#xa; (Prod AKS), Contributor (Prod Sub)&#xa;  • azdo-oidc-nonprod SP → Contributor (Dev/QA Subs)&#xa;  • azdo-oidc-platform SP → Contributor (Conn Sub)&#xa;&#xa;Application UAMIs (Assigned INSIDE TF State):&#xa;&#xa;  • uami-*-api → Key Vault Secrets User (Env KV)&#xa;&#xa;Infrastructure UAMIs (Assigned INSIDE TF State):&#xa;&#xa;  • uami-prod-appgw → Key Vault Secrets User (Prod KV)" style="rounded=0;fillColor=#ffffff;strokeColor=none;align=left;verticalAlign=top;spacing=4;fontSize=11;" parent="rbac" vertex="1">
+          <mxGeometry x="10" y="30" width="400" height="200" as="geometry" />
         </mxCell>
-        <mxCell id="aks_header" value="-- AKS Cluster Identities --" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d1fae5;strokeColor=#10b981;fontSize=12;fontStyle=1" parent="entra_modern" vertex="1">
-          <mxGeometry x="10.571363636363635" y="377.94058823529423" width="676.5672727272727" height="40.70129411764707" as="geometry" />
+        <mxCell id="envs" value="Environment Alignment via Management Groups" style="rounded=1;fillColor=#f0f9ff;strokeColor=#0284c7;align=left;verticalAlign=top;spacing=8;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="420" y="330" width="420" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="uami_prod_aks" value="uami-prod-aks-cluster (UAMI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#34d399;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="31.71" y="428.82" width="158.29" height="43.61" as="geometry" />
+        <mxCell id="env_items" value="Platform MG:&#xa;  • Connectivity Subscription&#xa;Non-Production MG:&#xa;  • Dev Subscription&#xa;  • QA Subscription&#xa;Production MG:&#xa;  • Prod Subscription" style="rounded=0;fillColor=#ffffff;strokeColor=none;align=left;verticalAlign=top;spacing=4;fontSize=11;" parent="envs" vertex="1">
+          <mxGeometry x="10" y="30" width="400" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="uami_qa_aks" value="uami-qa-aks-cluster (UAMI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#34d399;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="243.14000000000001" y="428.82" width="143.43" height="43.61" as="geometry" />
+        <mxCell id="notes" value="Key Principles &amp; Notes" style="rounded=1;fillColor=#cfe2f3;strokeColor=#3d85c6;align=left;verticalAlign=top;spacing=8;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="420" y="500" width="420" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="uami_dev_aks" value="uami-dev-aks-cluster (UAMI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#34d399;fontSize=12" parent="entra_modern" vertex="1">
-          <mxGeometry x="478.86" y="428.82" width="133.43" height="43.61" as="geometry" />
-        </mxCell>
-        <mxCell id="edge_azdo_oidc_prod" value="OIDC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;fontSize=10;endArrow=block;" parent="entra_modern" source="azdo" target="oidc_prod" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="119" y="50" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="azdo" value="Azure DevOps (OIDC Service Connections)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaffea;strokeColor=#22c55e;fontSize=16;fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="850" y="180" width="430" height="140" as="geometry" />
-        </mxCell>
-        <mxCell id="azdo_list" value="azrm-oidc-platform (OIDC)&#xa;azrm-oidc-nonprod (OIDC)&#xa;azrm-oidc-prod (OIDC)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#86efac;fontSize=13" parent="azdo" vertex="1">
-          <mxGeometry x="20" y="16.470588235294116" width="390" height="67.25764705882352" as="geometry" />
-        </mxCell>
-        <mxCell id="mg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#94a3b8;fontSize=16;fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="60" y="780" width="1350" height="400" as="geometry" />
-        </mxCell>
-        <mxCell id="mg_platform" value="Platform MG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#94a3b8;fontSize=14;fontStyle=1" parent="mg" vertex="1">
-          <mxGeometry x="23.08" y="42.11" width="276.92" height="227.89" as="geometry" />
-        </mxCell>
-        <mxCell id="policy" value="Azure Policy: Deny Public IP Creation&#xa;(Inherited by Non-Production &amp; Production)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eef2ff;strokeColor=#6366f1;fontSize=12" parent="mg_platform" vertex="1">
-          <mxGeometry x="9.230666666666666" y="28.48625" width="258.45866666666666" height="56.9725" as="geometry" />
-        </mxCell>
-        <mxCell id="mg_nonprod" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#94a3b8;fontSize=14;fontStyle=1" parent="mg" vertex="1">
-          <mxGeometry x="360" y="42.10526315789473" width="310" height="336.84210526315786" as="geometry" />
-        </mxCell>
-        <mxCell id="sub_qa" value="Subscription: QA Environment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9ca3af;fontSize=13" parent="mg_nonprod" vertex="1">
-          <mxGeometry x="15.5" y="42.10526315789473" width="279" height="126.3157894736842" as="geometry" />
-        </mxCell>
-        <mxCell id="rg_qa" value="rg-qa-app-services&#xa;AKS: aks-qa-main&#xa;ACR: acr-qa-main&#xa;Default NSG on subnets" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;fontSize=12" parent="sub_qa" vertex="1">
-          <mxGeometry x="7.749999999999998" y="35.78947368421053" width="263.49999999999994" height="73.68421052631578" as="geometry" />
-        </mxCell>
-        <mxCell id="sub_dev" value="Subscription: Dev Environment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9ca3af;fontSize=13" parent="mg_nonprod" vertex="1">
-          <mxGeometry x="15.5" y="189.4736842105263" width="279" height="126.3157894736842" as="geometry" />
-        </mxCell>
-        <mxCell id="rg_dev" value="rg-dev-user-a&#xa;AKS: aks-dev-user-a&#xa;ACR: acr-dev-user-a&#xa;Default NSG on subnets" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cbd5e1;fontSize=12" parent="sub_dev" vertex="1">
-          <mxGeometry x="7.749999999999998" y="14.736842105263158" width="263.49999999999994" height="73.68421052631578" as="geometry" />
-        </mxCell>
-        <mxCell id="NrWA7-6yoMMgJQawFXRp-7" value="&lt;span style=&quot;font-size: 14px; font-weight: 700; background-color: rgb(242, 242, 242);&quot;&gt;Non-Production MG&lt;/span&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="mg_nonprod">
-          <mxGeometry x="92.16" y="10.526315789473683" width="147.84" height="21.052631578947366" as="geometry" />
-        </mxCell>
-        <mxCell id="mg_prod" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#94a3b8;fontSize=14;fontStyle=1" parent="mg" vertex="1">
-          <mxGeometry x="690" y="20" width="640" height="358.95" as="geometry" />
-        </mxCell>
-        <mxCell id="sub_prod" value="Subscription: Prod Environment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9ca3af;fontSize=13" parent="mg_prod" vertex="1">
-          <mxGeometry x="20" y="30" width="600" height="306.52" as="geometry" />
-        </mxCell>
-        <mxCell id="rg_prod" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontSize=12;fontStyle=1" parent="sub_prod" vertex="1">
-          <mxGeometry x="17.14" y="11.789230769230768" width="565.71" height="282.94153846153847" as="geometry" />
-        </mxCell>
-        <mxCell id="aks_prod" value="AKS: aks-prod-main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#60a5fa;fontSize=12" parent="rg_prod" vertex="1">
-          <mxGeometry x="17.142727272727278" y="12.631318681318684" width="257.14090909090913" height="42.44123076923078" as="geometry" />
-        </mxCell>
-        <mxCell id="acr_prod" value="ACR: acr-prod-main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#34d399;fontSize=12" parent="rg_prod" vertex="1">
-          <mxGeometry x="17.142727272727278" y="75.7879120879121" width="257.14090909090913" height="42.44123076923078" as="geometry" />
-        </mxCell>
-        <mxCell id="kv_prod" value="Key Vault: kv-prod-secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf2f8;strokeColor=#ec4899;fontSize=12" parent="rg_prod" vertex="1">
-          <mxGeometry x="17.14" y="138.94450549450548" width="212.86" height="42.44123076923078" as="geometry" />
-        </mxCell>
-        <mxCell id="uami_prod_api_rg" value="uami-prod-api-workload" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf4ff;strokeColor=#d946ef;fontSize=12" parent="rg_prod" vertex="1">
-          <mxGeometry x="359.29" y="181.38492307692312" width="190" height="42.44123076923078" as="geometry" />
-        </mxCell>
-        <mxCell id="uami_prod_aks_rg" value="uami-prod-aks-cluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfdf5;strokeColor=#34d399;fontSize=12" parent="rg_prod" vertex="1">
-          <mxGeometry x="332.86" y="12.631318681318684" width="188.57" height="42.44123076923078" as="geometry" />
-        </mxCell>
-        <mxCell id="vnet_prod_spoke" value="VNet: vnet-prod-spoke&#xa;Subnets: snet-aks-nodes, snet-private-endpoints" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9ca3af;fontSize=12" parent="rg_prod" vertex="1">
-          <mxGeometry x="17.14" y="238.2153846153846" width="522.86" height="35.36769230769231" as="geometry" />
-        </mxCell>
-        <mxCell id="nsg_prod_default" value="NSG: nsg-prod-spoke-default" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#f59e0b;fontSize=12" parent="rg_prod" vertex="1">
-          <mxGeometry x="345.7174025757577" y="75.7879120879121" width="217.13835500000008" height="28.294153846153854" as="geometry" />
-        </mxCell>
-        <mxCell id="edge_nsg_prod_to_vnet" value="Applies to subnets: snet-aks-nodes,&lt;div&gt;&amp;nbsp;snet-private-endpoints&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f59e0b;fontSize=10;endArrow=block;entryX=0.488;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="rg_prod" source="nsg_prod_default" target="vnet_prod_spoke" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="272.86" y="228.2107692307692" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="454.86" y="138.2107692307692" />
-              <mxPoint x="271.86" y="138.2107692307692" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="NrWA7-6yoMMgJQawFXRp-4" value="&lt;span style=&quot;font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 700; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; background-color: rgb(242, 242, 242); display: inline !important;&quot;&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Resource Group: rg-prod-app-services&lt;/font&gt;&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;fillColor=#F2F2F2;" vertex="1" parent="sub_prod">
-          <mxGeometry x="37.84999999999997" y="3.1599999999999966" width="250" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="NrWA7-6yoMMgJQawFXRp-8" value="&lt;span style=&quot;font-size: 14px; font-weight: 700; background-color: rgb(242, 242, 242);&quot;&gt;Production MG&lt;/span&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="mg_prod">
-          <mxGeometry x="279.1300000000001" y="2.7521189174093763" width="117.29729729729729" height="19.352126934406893" as="geometry" />
-        </mxCell>
-        <mxCell id="NrWA7-6yoMMgJQawFXRp-6" value="&lt;span style=&quot;font-size: 16px; font-weight: 700;&quot;&gt;Management Groups&lt;/span&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="mg">
-          <mxGeometry x="600" width="200" height="31.57894736842105" as="geometry" />
-        </mxCell>
-        <mxCell id="sub_connect" value="Subscription: Connectivity (Hub)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9ca3af;fontSize=14;fontStyle=1" parent="1" vertex="1">
-          <mxGeometry x="60" y="1210" width="1170" height="260" as="geometry" />
-        </mxCell>
-        <mxCell id="rg_connect" value="Resource Group: rg-platform-connectivity" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontSize=12;fontStyle=1" parent="sub_connect" vertex="1">
-          <mxGeometry x="20" y="34" width="1130" height="190" as="geometry" />
-        </mxCell>
-        <mxCell id="vnet_hub" value="VNet: vnet-hub-weu" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9ca3af;fontSize=12" parent="rg_connect" vertex="1">
-          <mxGeometry x="20" y="30" width="200" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="afw_subnet" value="AzureFirewallSubnet (Azure Firewall)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#60a5fa;fontSize=12" parent="rg_connect" vertex="1">
-          <mxGeometry x="240" y="30" width="220" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="gw_subnet" value="GatewaySubnet (VPN/ER)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#60a5fa;fontSize=12" parent="rg_connect" vertex="1">
-          <mxGeometry x="480" y="30" width="180" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="bastion_subnet" value="AzureBastionSubnet (Bastion)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#60a5fa;fontSize=12" parent="rg_connect" vertex="1">
-          <mxGeometry x="680" y="30" width="210" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="nsg_bastion" value="NSG: nsg-AzureBastionSubnet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#f59e0b;fontSize=12" parent="rg_connect" vertex="1">
-          <mxGeometry x="920" y="80" width="200" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="private_dns" value="Private DNS Zones (central)&#xa;- privatelink.vaultcore.azure.net&#xa;- privatelink.azurecr.io" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#a78bfa;fontSize=12" parent="rg_connect" vertex="1">
-          <mxGeometry x="20" y="80" width="320" height="80" as="geometry" />
-        </mxCell>
-        <mxCell id="edge_policy_nonprod" value="Policy Inherited" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6366f1;fontSize=10;endArrow=block;" parent="1" source="policy" target="mg_nonprod" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="edge_policy_prod" value="Policy Inherited" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6366f1;fontSize=10;endArrow=block;" parent="1" source="policy" target="mg_prod" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="550" y="890" />
-              <mxPoint x="550" y="890" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="edge_nsg_bastion" value="Secures Bastion Subnet" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f59e0b;fontSize=10;endArrow=block;" parent="1" source="nsg_bastion" target="bastion_subnet" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="edge_uami_api_to_kv" value="RBAC: Secrets User" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d946ef;fontSize=10;endArrow=block;" parent="1" source="uami_prod_api_rg" target="kv_prod" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="edge_uami_aks_identity" value="Cluster Identity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#34d399;fontSize=10;endArrow=block;" parent="1" source="uami_prod_aks_rg" target="aks_prod" edge="1">
-          <mxGeometry x="-0.4286" y="21" relative="1" as="geometry">
-            <mxPoint x="-10" y="2" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="edge_uami_aks_netcontrib" value="RBAC: Network Contributor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#34d399;fontSize=10;endArrow=block;" parent="1" source="uami_prod_aks_rg" target="vnet_prod_spoke" edge="1">
-          <mxGeometry x="-0.1077" relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1214" y="1010" />
-              <mxPoint x="1130" y="1010" />
-            </Array>
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="edge_vnetlink_dns" value="Automatic VNet Link" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#a78bfa;fontSize=10;endArrow=block;" parent="1" source="vnet_prod_spoke" target="private_dns" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1168" y="1130" />
-              <mxPoint x="260" y="1130" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="edge_azdo_oidc_nonprod" value="OIDC" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#16a34a;fontSize=10;endArrow=block;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="azdo" target="oidc_nonprod" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="832.2857142857143" y="193.46153846153845" as="sourcePoint" />
-            <mxPoint x="440" y="340" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="606" y="210" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="edge_oidc_to_acr" value="RBAC: AcrPush" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#001DBC;fontSize=10;endArrow=block;fillColor=#0050ef;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" parent="1" source="oidc_nonprod" target="acr_prod" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="314.2813636363636" y="388.9702941176471" as="sourcePoint" />
-            <mxPoint x="1000" y="910" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="notes_items" value="✅ Eliminate Static Secrets: Use OIDC for external systems (CI/CD) and&#xa; UAMI for Azure workloads.&#xa;✅ Least Privilege: Assign roles scoped to specific resources/groups.&#xa;✅ Declarative RBAC (UAMI): Manage UAMI role assignments within Terraform.&#xa;✅ External RBAC (OIDC): Manage OIDC SP roles in Entra ID.&#xa;✅ PIM for Admins: Use Just-in-Time access for human operators." style="rounded=0;fillColor=#ffffff;strokeColor=none;align=left;verticalAlign=top;spacing=4;fontSize=11;" parent="notes" vertex="1">
+          <mxGeometry x="9.999999999999998" y="30" width="399.99999999999994" height="110" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

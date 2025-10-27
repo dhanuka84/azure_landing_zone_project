@@ -1,84 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-M">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Azure Landing Zone Model (Zero Trust)</title>
+    <title>Azure Enterprise Landing Zone Model (Zero Trust)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f0f4f8;
-            font-family: 'Inter', sans-serif;
-            color: #334155;
-        }
-        .container-box {
-            background-color: white;
-            border-radius: 0.75rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 0.25rem;
-        }
-        .purpose {
-            font-size: 0.875rem;
-            color: #64748b;
-            margin-bottom: 1rem;
-            font-style: italic;
-        }
-        .item-list {
-            list-style: none;
-            padding-left: 1.25rem;
-            border-left: 2px solid #cbd5e1;
-        }
-        .item-list li {
-            position: relative;
-            padding-left: 1rem;
-            margin-bottom: 0.75rem;
-        }
-        .item-list li::before {
-            content: '';
-            position: absolute;
-            left: -1.25rem;
-            top: 0.5em;
-            width: 0.75rem;
-            height: 2px;
-            background-color: #cbd5e1;
-        }
-        .item-title {
-            font-weight: 500;
-            color: #475569;
-        }
-        .item-detail {
-            font-size: 0.875rem;
-            color: #64748b;
-            display: block;
-        }
-        .icon {
-            margin-right: 0.5rem;
-            color: #3b82f6;
-        }
-        .tag {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-block;
-            margin-top: 0.5rem;
-            margin-right: 0.25rem;
-        }
+        body { background-color: #f0f4f8; font-family: 'Inter', sans-serif; color: #334155; }
+        .container-box { background-color: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .title { font-size: 1.125rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem; }
+        .purpose { font-size: 0.875rem; color: #64748b; margin-bottom: 1rem; font-style: italic; }
+        .item-list { list-style: none; padding-left: 1.25rem; border-left: 2px solid #cbd5e1; }
+        .item-list li { position: relative; padding-left: 1rem; margin-bottom: 0.75rem; }
+        .item-list li::before { content: ''; position: absolute; left: -1.25rem; top: 0.5em; width: 0.75rem; height: 2px; background-color: #cbd5e1; }
+        .item-title { font-weight: 500; color: #475569; }
+        .item-detail { font-size: 0.875rem; color: #64748b; display: block; }
+        .icon { margin-right: 0.5rem; color: #3b82f6; }
+        .tag { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; display: inline-block; margin-top: 0.5rem; margin-right: 0.25rem; }
         .policy-tag { background-color: #eef2ff; color: #4f46e5; }
         .rbac-tag { background-color: #fefce8; color: #a16207; }
         .network-tag { background-color: #f0f9ff; color: #0284c7; }
         .region-tag { background-color: #f5f3ff; color: #6d28d9; }
         .az-tag { background-color: #f0fdf4; color: #16a34a;}
-        .new-tag { background-color: #fdf2f8; color: #db2777; }
+        .sec-tag { background-color: #fef2f2; color: #dc2626;} /* Security Tag */
     </style>
      <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
@@ -86,57 +31,49 @@
 </head>
 <body class="p-8">
 
-    <h1 class="text-3xl font-bold text-center mb-4 text-slate-800">Modern Azure Landing Zone Model (Zero Trust)</h1>
-    <p class="text-center text-slate-500 mb-12 max-w-3xl mx-auto">This diagram illustrates a well-architected Azure environment, showing the relationship between billing, identity, governance, networking, and resource deployment across different environments.</p>
+    <h1 class="text-3xl font-bold text-center mb-4 text-slate-800">Azure Enterprise Landing Zone Model (Zero Trust Enhanced)</h1>
+    <p class="text-center text-slate-500 mb-12 max-w-3xl mx-auto">This diagram illustrates a modernized, Zero Trust-aligned Azure environment, highlighting credential-less identity, defense-in-depth networking, and policy-driven governance.</p>
 
     <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="container-box">
                 <h2 class="title"><i class="fas fa-file-invoice-dollar icon"></i>Billing Account</h2>
-                <p class="purpose">Top-level financial ownership and cost aggregation for the entire organization.</p>
-                <span class="item-detail">e.g., Enterprise Agreement or Microsoft Customer Agreement</span>
+                <p class="purpose">Top-level financial ownership and cost aggregation.</p>
+                <span class="item-detail">e.g., Enterprise Agreement or MCA</span>
             </div>
-            
             <div class="container-box">
                 <h2 class="title"><i class="fas fa-users-cog icon"></i>Microsoft Entra ID Tenant</h2>
-                <p class="purpose">Single source of truth for identity and access management (IAM).</p>
+                <p class="purpose">Central identity provider using modern authentication.</p>
                 <ul class="item-list mt-4">
-                    <li><span class="item-title"><i class="fas fa-user icon"></i>Users and Groups</span> <span class="item-detail">e.g., "Dev Team Group", "AKS Admins Group"</span></li>
+                    <li><span class="item-title"><i class="fas fa-user icon"></i>Users and Groups</span> <span class="item-detail">Managed via Entra ID, PIM for privileged access.</span></li>
                     <li>
-                        <span class="item-title"><i class="fas fa-robot icon"></i>Modern Identities (Zero Trust)</span>
-                        <span class="item-detail">Identities for automated processes and applications, replacing static secrets.</span>
+                        <span class="item-title"><i class="fas fa-robot icon"></i>Workload Identities</span>
+                        <span class="item-detail">Credential-less identities for automation and applications.</span>
                         <ul class="item-list mt-2">
-                            <li class="pt-2 border-t border-slate-200 mt-2">
-                                <span class="item-title text-orange-600">-- CI/CD Pipeline --</span>
-                                <div class="tag new-tag"><i class="fa-solid fa-key"></i> OIDC / Workload Identity Federation</div>
-                                <span class="item-detail"><b>AzDevOps Service Connection</b> links to an <b>Entra ID App Registration</b>.</span>
-                                <span class="item-detail">Auth based on <b>Client ID</b> + Federated Credential (No Secret).</span>
-                            </li>
-                            <li class="pt-2 border-t border-slate-200 mt-2">
-                                <span class="item-title text-blue-600">-- Application Workloads --</span>
-                                <div class="tag new-tag"><i class="fa-solid fa-id-card"></i> User-Assigned Managed Identity (UAMI)</div>
-                                <span class="item-detail"><b>Entra ID UAMI</b> (e.g., "uami-prod-api") has its own <b>Client ID</b>.</span>
-                                <span class="item-detail">RBAC roles are assigned to the UAMI's Principal ID.</span>
-                            </li>
+                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-orange-600">-- CI/CD Pipeline (OIDC) --</span></li>
+                            <li><span class="item-title">Federated Credentials:</span> <span class="item-detail">Trust Azure DevOps OIDC tokens for deployment, no secrets needed.</span></li>
+                            <li class="pt-2 border-t border-slate-200 mt-2"><span class="item-title text-emerald-600">-- Application Workloads (UAMI) --</span></li>
+                            <li><span class="item-title">uami-prod-api-workload:</span> <span class="item-detail">Managed Identity for Prod API access to Key Vault.</span></li>
+                            <li><span class="item-title">uami-qa-api-workload:</span> <span class="item-detail">Managed Identity for QA API.</span></li>
                         </ul>
                     </li>
                 </ul>
             </div>
-            </div>
+        </div>
 
         <div class="container-box">
             <h2 class="title"><i class="fas fa-sitemap icon"></i>Management Group Hierarchy</h2>
-            <p class="purpose">Organizes subscriptions and applies universal security policies (Azure Policy) and access controls (RBAC).</p>
+            <p class="purpose">Applies inherited Azure Policies and RBAC for governance.</p>
 
             <ul class="item-list mt-4">
                 <li>
                     <div class="font-semibold text-lg text-indigo-700"><i class="fas fa-landmark icon text-indigo-500"></i>Management Group: "Platform"</div>
-                    <div class="tag policy-tag">Policy: Enforce security and operational standards for shared services.</div>
-                    <div class="tag new-tag"><i class="fa-solid fa-ban"></i> NEW Policy: "Deny Public IP Creation" (Inherited by all)</div>
+                    <div class="tag policy-tag">Policy: Deny Public IP Creation (Inherited by all subs).</div>
+                    <div class="tag policy-tag">Policy: Enforce Tagging Taxonomy.</div>
                     <ul class="item-list mt-2">
                         <li>
                             <span class="item-title"><i class="fas fa-cloud icon"></i>Subscription: "Connectivity"</span>
-                            <span class="item-detail">Hosts central networking infrastructure (Hub-and-Spoke model).</span>
+                            <span class="item-detail">Hosts central networking and security infrastructure.</span>
                             <ul class="item-list mt-2">
                                 <li>
                                     <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-platform-connectivity"</span>
@@ -144,19 +81,15 @@
                                         <li>
                                             <span class="item-title"><i class="fas fa-network-wired icon text-indigo-500"></i>Hub VNet: "vnet-hub-weu"</span>
                                             <div><div class="tag region-tag">Region: West Europe</div></div>
-                                            <span class="item-detail">Central point for all network traffic.</span>
+                                            <span class="item-detail">Central point for traffic, protected by DDoS Plan.</span>
                                             <ul class="item-list mt-2">
-                                                <li><span class="item-title"><i class="fas fa-fire-alt icon text-red-500"></i>AzureFirewallSubnet:</span> <span class="item-detail">Contains Azure Firewall (Zone-Redundant).</span><div class="tag az-tag">AZ</div></li>
-                                                <li><span class="item-title"><i class="fas fa-road-bridge icon text-green-500"></i>GatewaySubnet:</span> <span class="item-detail">For VPN/ExpressRoute gateway to on-premises.</span></li>
-                                                <li><span class="item-title"><i class="fas fa-user-shield icon text-blue-500"></i>AzureBastionSubnet:</span> <span class="item-detail">For secure RDP/SSH access to VMs.</span></li>
+                                                <li><span class="item-title"><i class="fas fa-fire-alt icon text-red-500"></i>AzureFirewallSubnet:</span> <span class="item-detail">Contains Azure Firewall (Standard).</span></li>
+                                                <li><span class="item-title"><i class="fas fa-road-bridge icon text-green-500"></i>GatewaySubnet:</span> <span class="item-detail">For VPN/ExpressRoute (Optional).</span></li>
+                                                <li><span class="item-title"><i class="fas fa-user-shield icon text-blue-500"></i>AzureBastionSubnet:</span> <span class="item-detail">Secure RDP/SSH.</span><div class="tag sec-tag">Mandatory NSG Applied</div></li>
                                             </ul>
                                         </li>
-                                         <li>
-                                            <span class="item-title"><i class="fas fa-shield-halved icon text-blue-500"></i>NSG: "nsg-AzureBastionSubnet"</span>
-                                            <div class="tag new-tag"><i class="fa-solid fa-shield-virus"></i> NEW: Mandatory NSG</div>
-                                            <span class="item-detail">Applies required security rules to the Bastion subnet.</span>
-                                        </li>
-                                         <li><span class="item-title"><i class="fas fa-dns icon text-indigo-500"></i>Private DNS Zones</span> <span class="item-detail">For services like Key Vault, ACR, etc. (e.g., privatelink.vaultcore.azure.net)</span></li>
+                                         <li><span class="item-title"><i class="fas fa-dns icon text-indigo-500"></i>Private DNS Zones</span> <span class="item-detail">Central zones for Private Link (e.g., Key Vault, ACR). Automatically linked by Spokes.</span></li>
+                                         <li><span class="item-title"><i class="fas fa-shield-virus icon text-red-600"></i>DDoS Protection Plan</span> <span class="item-detail">Standard tier, associated with Hub and Spoke VNets.</span></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -165,11 +98,11 @@
                 </li>
                 <li>
                     <div class="font-semibold text-lg text-green-700"><i class="fas fa-shield-alt icon text-green-500"></i>Management Group: "Production"</div>
-                    <div class="tag policy-tag">Policy: Enforce strict security, logging, and disallow certain VM SKUs.</div>
+                    <div class="tag policy-tag">Policy: Inherits "Deny Public IP". Additional restrictive policies apply here.</div>
                     <ul class="item-list mt-2">
                         <li>
                             <span class="item-title"><i class="fas fa-cloud icon"></i>Subscription: "Prod Environment"</span>
-                            <span class="item-detail">Hosts all production resources. Highly restricted access.</span>
+                            <span class="item-detail">Hosts production workloads. Restricted access via PIM.</span>
                             <ul class="item-list mt-2">
                                 <li>
                                     <span class="item-title"><i class="fas fa-box icon"></i>Resource Group: "rg-prod-app-services"</span>
@@ -178,36 +111,46 @@
                                             <span class="item-title"><i class="fas fa-network-wired icon text-green-500"></i>Spoke VNet: "vnet-prod-spoke"</span>
                                              <div>
                                                 <div class="tag region-tag">Region: West Europe</div>
-                                                <div class="tag network-tag">VNet Peering: Connected to "vnet-hub-weu"</div>
-                                                <div class="tag network-tag">Route Table (UDR): Forces traffic through Hub Firewall</div>
-                                                <div class="tag new-tag"><i class="fa-solid fa-link"></i> Auto-links to Private DNS Zones</div>
+                                                <div class="tag network-tag">VNet Peering: To "vnet-hub-weu"</div>
+                                                <div class="tag network-tag">Route Table (UDR): Forces traffic via Hub Firewall</div>
+                                                <div class="tag network-tag">DNS: Linked to Hub Private DNS Zones</div>
+                                                <div class="tag sec-tag">Associated with DDoS Plan</div>
                                             </div>
                                             <ul class="item-list mt-2">
-                                                <li><span class="item-title">snet-aks-nodes:</span><span class="item-detail">For AKS node pools.</span><div class="tag new-tag"><i class="fa-solid fa-shield-halved"></i> Default NSG Applied</div></li>
-                                                <li><span class="item-title">snet-private-endpoints:</span><span class="item-detail">For all Private Endpoints.</span><div class="tag new-tag"><i class="fa-solid fa-shield-halved"></i> Default NSG Applied</div></li>
+                                                <li><span class="item-title">snet-aks-nodes:</span><span class="item-detail">For AKS nodes.</span><div class="tag sec-tag">Default NSG Applied</div></li>
+                                                <li><span class="item-title">snet-private-endpoints:</span><span class="item-detail">For PEs.</span><div class="tag sec-tag">Default NSG Applied</div></li>
+                                                <li><span class="item-title">snet-app-gateway:</span><span class="item-detail">For App Gateway.</span><div class="tag sec-tag">Specific NSG Applied</div></li>
+                                                <li><span class="item-title">snet-apim:</span><span class="item-detail">For APIM.</span><div class="tag sec-tag">Specific NSG Applied</div></li>
                                             </ul>
                                         </li>
                                         <li>
+                                            <span class="item-title"><i class="fas fa-shield-alt icon text-red-500"></i>Application Gateway: "appgw-prod-main"</span>
+                                            <span class="item-detail">WAF v2 enabled, uses Public IP, routes to internal APIM.</span>
+                                            <div class="tag network-tag">In "snet-app-gateway".</div>
+                                            <div class="tag sec-tag">Uses SSL Cert from Key Vault via Managed Identity.</div>
+                                        </li>
+                                         <li>
+                                            <span class="item-title"><i class="fas fa-route icon text-blue-500"></i>API Management: "apim-prod-main"</span>
+                                            <span class="item-detail">Internal mode, exposes APIs from AKS.</span>
+                                            <div class="tag network-tag">In "snet-apim".</div>
+                                        </li>
+                                        <li>
                                             <span class="item-title"><i class="fas fa-cubes icon"></i>AKS Cluster: "aks-prod-main"</span>
-                                            <span class="item-detail">Integrates with "vnet-prod-spoke" (snet-aks-nodes).</span>
-                                            <div class="tag az-tag">AZ: Deployed across Availability Zones 1, 2, 3.</div>
-                                            <div class="tag new-tag"><i class="fa-solid fa-id-card"></i> Uses UAMI for its identity.</div>
+                                            <span class="item-detail">Integrates with "vnet-prod-spoke" (snet-aks-nodes). Internal LB.</span>
+                                            <div class="tag rbac-tag">RBAC: OIDC identity needs Contributor/AKS Cluster Admin role (assigned outside TF).</div>
+                                            <div class="tag az-tag">AZ: Deployed across Availability Zones.</div>
                                         </li>
                                         <li>
                                             <span class="item-title"><i class="fas fa-database icon"></i>ACR: "acr-prod-main"</span>
-                                            <div class="tag rbac-tag">RBAC: "AcrPush" role given to OIDC Pipeline Identity.</div>
+                                            <div class="tag rbac-tag">RBAC: OIDC identity needs AcrPush role (assigned outside TF).</div>
                                             <div class="tag network-tag">Network: Accessed via Private Endpoint in "snet-private-endpoints".</div>
                                         </li>
                                         <li>
                                             <span class="item-title"><i class="fas fa-key icon"></i>Key Vault: "kv-prod-secrets"</span>
-                                            <div class="tag rbac-tag">RBAC: "Secrets User" role given to "uami-prod-api-workload".</div>
+                                            <div class="tag rbac-tag">RBAC: Grant "uami-prod-api-workload" Secrets User role.</div>
                                              <div class="tag network-tag">Network: Accessed via Private Endpoint in "snet-private-endpoints".</div>
                                         </li>
-                                        <li>
-                                            <span class="item-title"><i class="fas fa-id-card icon text-blue-500"></i>UAMI: "uami-prod-api-workload"</span>
-                                            <div class="tag new-tag"><i class="fa-solid fa-id-card"></i> NEW: Workload Identity</div>
-                                            <span class="item-detail">The application running in AKS uses this identity to access Key Vault.</span>
-                                        </li>
+                                        <li><span class="item-title"><i class="fas fa-id-card icon"></i>User Assigned Identity: "uami-prod-api-workload"</span> <span class="item-detail">Used by AKS workloads to access Key Vault.</span></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -216,7 +159,7 @@
                 </li>
                 <li>
                     <div class="font-semibold text-lg text-amber-700"><i class="fas fa-flask icon text-amber-500"></i>Management Group: "Non-Production"</div>
-                     <div class="tag policy-tag">Policy: More flexible policies for development and testing.</div>
+                     <div class="tag policy-tag">Policy: Inherits "Deny Public IP". More flexible policies here.</div>
                     <ul class="item-list mt-2">
                         <li>
                             <span class="item-title"><i class="fas fa-vial icon"></i>Subscription: "QA Environment"</span>
@@ -228,15 +171,11 @@
                                             <span class="item-title"><i class="fas fa-network-wired icon text-amber-500"></i>Spoke VNet: "vnet-qa-spoke"</span>
                                             <div>
                                                 <div class="tag region-tag">Region: West Europe</div>
-                                                <div class="tag network-tag">VNet Peering: Connected to "vnet-hub-weu".</div>
-                                                <div class="tag new-tag"><i class="fa-solid fa-link"></i> Auto-links to Private DNS Zones</div>
+                                                <div class="tag network-tag">Peered to Hub, UDR to Firewall, Linked DNS</div>
+                                                <div class="tag sec-tag">Default NSGs applied, DDoS enabled</div>
                                             </div>
-                                            <ul class="item-list mt-2">
-                                                <li><span class="item-title">snet-aks-nodes:</span><span class="item-detail">For QA AKS nodes.</span><div class="tag new-tag"><i class="fa-solid fa-shield-halved"></i> Default NSG Applied</div></li>
-                                                <li><span class="item-title">snet-private-endpoints:</span><span class="item-detail">For QA Private Endpoints.</span><div class="tag new-tag"><i class="fa-solid fa-shield-halved"></i> Default NSG Applied</div></li>
-                                            </ul>
                                         </li>
-                                        <li><span class="item-title"><i class="fas fa-cubes icon"></i>AKS, ACR, Key Vault...</span><span class="item-detail">Resources configured with QA identities and Private Endpoints in "snet-private-endpoints".</span></li>
+                                        <li><span class="item-title"><i class="fas fa-cubes icon"></i>AKS, ACR, Key Vault...</span><span class="item-detail">Resources using QA UAMIs and Private Endpoints.</span></li>
                                      </ul>
                                 </li>
                             </ul>
@@ -251,8 +190,8 @@
                                             <span class="item-title"><i class="fas fa-network-wired icon text-amber-500"></i>Spoke VNet: "vnet-dev-spoke"</span>
                                             <div>
                                                 <div class="tag region-tag">Region: West Europe</div>
-                                                <div class="tag network-tag">VNet Peering: Connected to "vnet-hub-weu".</div>
-                                                <div class="tag new-tag"><i class="fa-solid fa-link"></i> Auto-links to Private DNS Zones</div>
+                                                <div class="tag network-tag">Peered to Hub, UDR to Firewall, Linked DNS</div>
+                                                <div class="tag sec-tag">Default NSGs applied, DDoS enabled</div>
                                             </div>
                                         </li>
                                      </ul>
