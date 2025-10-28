@@ -28,16 +28,18 @@ module "firewall" {
 }
 
 # NEW: Create a central DDoS Protection Plan
-resource "azurerm_ddos_protection_plan" "this" {
-  name                = "ddos-plan-${var.name_prefix}"
+resource "azurerm_network_ddos_protection_plan" "this" {
+  name                = "${var.prefix}-ddos-plan"
   location            = var.location
   resource_group_name = var.resource_group_name
-  tags                = { environment = "platform", layer = "security" }
+  tags                = var.tags
 }
+
 
 # NEW: Add mandatory NSG for Azure Bastion Subnet
 module "nsg_bastion" {
   source              = "../../modules/nsg-bastion"
+  prefix              = var.prefix
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = module.hub.bastion_subnet_id

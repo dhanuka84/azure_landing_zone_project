@@ -18,3 +18,5 @@ variable "tags" {
   default     = {}
   description = "A map of tags to apply to the NSG."
 }
+
+variable "prefix" { type = string }

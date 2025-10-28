@@ -12,3 +12,7 @@ output "private_dns_zone_ids" {
   }
   description = "Map of private DNS zone names to their resource IDs."
 }
+
+output "ddos_protection_plan_id" {
+  value = azurerm_network_ddos_protection_plan.this.id
+}
