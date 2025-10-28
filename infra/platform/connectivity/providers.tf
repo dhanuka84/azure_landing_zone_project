@@ -7,8 +7,11 @@ terraform {
       version = "~> 4.50" # <-- UPDATED AzureRM provider version
     }
   }
+  /*
   backend "azurerm" {}
+  */
 }
+
 
 provider "azurerm" {
   features {}

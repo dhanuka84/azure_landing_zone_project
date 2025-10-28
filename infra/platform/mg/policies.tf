@@ -10,5 +10,5 @@ resource "azurerm_management_group_policy_assignment" "deny_public_ip" {
   management_group_id  = azurerm_management_group.platform.id
   policy_definition_id = data.azurerm_policy_definition.deny_public_ip.id
   description          = "Deny creation of Public IP addresses on NICs."
-  enforcement_mode     = "Enabled"
+  enforce              = true # Use 'enforce'
 }
